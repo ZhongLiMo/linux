@@ -4,7 +4,7 @@
 #include "tcpclient.h"
 #include "tcppacket.h"
 
-TCPServer::TCPServer(int(*clinetProcess)(TCPClient*, TCPPacket*)) : clinetProcess(clinetProcess), m_fd(0), m_eplfd(0)
+TCPServer::TCPServer(int(*clinetProcess)(TCPClient*, TCPPacket*)) : m_fd(0), m_eplfd(0), clinetProcess(clinetProcess)
 {
 }
 
@@ -47,7 +47,7 @@ int TCPServer::onProcess()
             {
                 //我叼你妈的这也能为空
             }
-            else if (client->fd == m_fd)
+            else if (client->m_fd == m_fd)
             {
                 acceptClient();
             }
@@ -96,8 +96,8 @@ int TCPServer::closeClient(TCPClient* pClient)
 	{
 		return -1;
 	}
-	epoll_del(m_eplfd, pClient->fd);
-	close(pClient->fd);
+	epoll_del(m_eplfd, pClient->m_fd);
+	close(pClient->m_fd);
 	delete pClient;
 	return 0;
 }
@@ -107,7 +107,7 @@ int TCPServer::recvClient(TCPClient* pClient)
 	int result = 0;
 	if (pClient->tcppacket.cursize < TCP_HEAD_SIZE)
 	{
-		result = fd_read(pClient->fd, reinterpret_cast<char*>(pClient->tcppacket.header) + pClient->tcppacket.cursize, 
+		result = fd_read(pClient->m_fd, reinterpret_cast<char*>(&pClient->tcppacket.header) + pClient->tcppacket.cursize, 
 							TCP_HEAD_SIZE - pClient->tcppacket.cursize);
 	}
 	else if (pClient->tcppacket.cursize == TCP_HEAD_SIZE && pClient->tcppacket.header.length == 0)
@@ -116,7 +116,7 @@ int TCPServer::recvClient(TCPClient* pClient)
 	}
 	else
 	{
-		result = fd_read(pClient->fd, pClient->tcppacket.buffer + pClient->tcppacket.cursize - TCP_HEAD_SIZE,
+		result = fd_read(pClient->m_fd, pClient->tcppacket.buffer + pClient->tcppacket.cursize - TCP_HEAD_SIZE,
 							TCP_BUFF_SIZE - pClient->tcppacket.cursize + TCP_HEAD_SIZE);
 	}
 

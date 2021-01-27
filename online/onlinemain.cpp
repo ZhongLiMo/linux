@@ -3,21 +3,25 @@
 #include "timer.h"
 #include "tcpserver.h"
 #include "mysqldb.h"
+#include "all_table_date.h"
 
 
-MysqlDB mysqldb;
-TCPServer tcpserver;
+MysqlDB* mysqldb = DBHandle->GetInstance();
+TCPServer tcpserver(deal_client_msg);
 TimerManager timer_manager;
 
-DBTble<UserRecord> userTable;						//完整的表
-char userTableName[] = "test_user";
+
+
+RecordTable<UserRecord> userTable;		//完整的表
+
 
 int init_mysql_data();
 
 int main(int argc, char *argv[])
 {
-    tcpserver.initServer("127.0.0.1", 6388);
+    tcpserver.initServer("127.0.0.1", "6388");
     timer_manager.InitTimer(10);
+    mysqldb->Connect("127.0.0.1", "root", "M:ppujV+u4wr", "test");
 
     if (init_mysql_data() < 0)
     {

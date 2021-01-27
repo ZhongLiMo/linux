@@ -2,6 +2,7 @@
 #define _SERVER_H_
 
 class TCPClient;
+class TCPPacket;
 
 #include "net.h"
 

@@ -8,7 +8,7 @@ CXX = g++
 #c编译选项
 CFLAGS = -g -O0 -Wall
 #c++编译选项
-CXXFLAGS = -g -O0 -fno-strict-aliasing -Wno-write-strings -frtti -fexceptions -Wall -DDEBUG
+CXXFLAGS = -g -O0 -Wall -fno-strict-aliasing -Wno-write-strings -frtti -fexceptions -DDEBUG -std=c++11
 #静态库打包工具
 AR = ar -r
 #非空

@@ -8,7 +8,7 @@ CXX = g++
 #c编译选项
 CFLAGS = -g -O0 -Wall
 #c++编译选项
-CXXFLAGS = -g -O0 -fno-strict-aliasing -Wno-write-strings -frtti -fexceptions -Wall -DDEBUG
+CXXFLAGS = -g -O0 -Wall -fno-strict-aliasing -Wno-write-strings -frtti -fexceptions -DDEBUG -std=c++11
 #静态库打包工具
 AR = ar -r
 #非空
@@ -24,7 +24,7 @@ INCPATH = -I/usr/include -I../common
 #目标文件
 TARGET = main
 #依赖文件
-OBJECTS = onlinemain.o
+OBJECTS = onlinemain.o online_process_client.o
 
 all: $(TARGET)
 

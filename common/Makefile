@@ -8,7 +8,7 @@ CXX = g++
 #c编译选项
 CFLAGS = -g -O0 -Wall
 #c++编译选项
-CXXFLAGS = -g -O0 -Wall -fno-strict-aliasing -Wno-write-strings -frtti -fexceptions -DDEBUG
+CXXFLAGS = -g -O0 -Wall -fno-strict-aliasing -Wno-write-strings -frtti -fexceptions -DDEBUG -std=c++11
 #静态库打包工具
 AR = ar -r
 #非空
@@ -24,7 +24,7 @@ INCPATH = -I/usr/include -I../common
 #目标文件
 TARGET = libcommon.a
 #依赖文件
-OBJECTS = netbase.o tcpclient.o tcppacket.o tcpserver.o
+OBJECTS = mysqldb.o netbase.o tcpclient.o tcppacket.o tcpserver.o mylog.o
 
 all: $(TARGET)
 

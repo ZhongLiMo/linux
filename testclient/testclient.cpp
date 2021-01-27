@@ -3,6 +3,8 @@
 #include "tcpclient.h"
 #include "netbase.h"
 #include "net.h"
+#include <stdio.h>
+#include <iostream>
 
 #define SERVER_ADDRESS      "127.0.0.1"  
 #define SERVER_PORT         (6388)  
@@ -29,7 +31,7 @@ int main()
     bzero(&stSvrAddr, sizeof(stSvrAddr));
     stSvrAddr.sin_family = AF_INET;
     stSvrAddr.sin_port = htons(SERVER_PORT);
-    stSvrAddr.sin_addr = inet_addr(SERVER_ADDRESS);
+    stSvrAddr.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
     iRet = connect(iSock, (struct sockaddr *)&stSvrAddr, sizeof(stSvrAddr));
     if (iRet < 0)
     {
@@ -42,7 +44,6 @@ int main()
 
 	while (true)
 	{
-		WaitForSingleObject(hMutex, INFINITE);
 		char szInput[256] = "";
 		printf("Me: cmd mg\n");
 		unsigned int cmd = 0;
@@ -53,11 +54,11 @@ int main()
 		}
 		else
 		{
-			client.tcppacket.pack_packet(szInput, szieof(szInput), cmd);
+			client.tcppacket.pack_packet(szInput, sizeof(szInput), cmd);
 			client.sendToServer();
 		}
 
-		if (fd_read(iSock, szInput, szieof(szInput)))
+		if (fd_read(iSock, szInput, sizeof(szInput)))
 		{
 			printf("recv %s\n", szInput);
 		}

@@ -13,9 +13,10 @@ int TCPClient::sendToServer()
     {
         return -1;
     }
-    fd_write(m_fd, &tcppacket.header, TCP_HEAD_SIZE);
+    fd_write(m_fd, reinterpret_cast<char*>(&tcppacket.header), TCP_HEAD_SIZE);
     if (tcppacket.header.length > 0)
     {
-        fd_write(m_fd, &tcppacket.buffer, tcppacket.header.length);
+        fd_write(m_fd, reinterpret_cast<char*>(&tcppacket.buffer), tcppacket.header.length);
     }
+    return 0;
 }
