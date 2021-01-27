@@ -7,10 +7,11 @@ class TCPClient
 {
 public:
 	TCPClient(int fd);
-	int fd() { return m_fd; }
-	TCPPacket tcppacket;
-private:
+	int sendToServer();
+public:
     int m_fd;
+	TCPPacket tcppacket;
+	friend class TCPServer;
 };
 
 

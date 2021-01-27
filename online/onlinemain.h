@@ -1,3 +1,10 @@
-class TCPClient;
+#ifndef _ONLINE_MAIN_H_
+#define _ONLINE_MAIN_H_
 
-int deal_client_msg(TCPClient* pTCPClient);
+class TCPClient;
+class TCPPacket;
+
+int deal_client_msg(TCPClient* pTCPClient, TCPPacket* pTCPPacket);
+
+
+#endif // !_ONLINE_MAIN_H_

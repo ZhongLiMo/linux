@@ -51,13 +51,12 @@ int create_socket()
 	{
 		return -1;
 	}
-	if (set_socket < 0)
+	if (set_socket(fd) < 0)
 	{
 		return -1;
 	}
 	return fd;
 }
-
 
 int listen_ip_port(const char* sIP, const char* sPort)
 {
@@ -84,7 +83,7 @@ int listen_ip_port(const char* sIP, const char* sPort)
 		return -1;
 	}
 
-	if (listen(fd, 128) != 0)
+	if (listen(fd, LISTEN_FD_SIZE) != 0)
 	{
 		perror("listen");
 		close(fd);
@@ -119,12 +118,60 @@ int fd_close(int fd)
 	return 0;
 }
 
-int fd_read(int fd, char *buf, size_t len)
+int fd_read(int sockfd, char *buf, size_t count)
 {
-	return 0;
+	size_t bytes_read = 0;
+    int this_read;
+
+    while (bytes_read < count)
+    {
+        do
+        {
+            this_read = read(sockfd, buf, count - bytes_read);
+        }
+        while ((this_read < 0) && (errno == EINTR));
+
+        if (this_read < 0)
+        {
+            if (bytes_read > 0 && errno == EAGAIN)
+            {
+                return bytes_read;
+            }
+            else
+            {
+                return this_read;
+            }
+        }
+        else if (this_read == 0)
+        {
+            return bytes_read;
+        }
+
+        bytes_read += this_read;
+        buf += this_read;
+    }
+
+    return count;
 }
 
-int fd_write(int fd, char *buf, size_t len)
+int fd_write(int sockfd, char *buf, size_t count)
 {
-	return 0;
+	size_t bytes_sent = 0;
+    int this_write;
+
+    while (bytes_sent < count)
+    {
+        do
+        {
+            this_write = write(sockfd, buf, count - bytes_sent);
+        }
+        while ( (this_write < 0) && (errno == EINTR) );
+        if (this_write <= 0)
+        {
+            return this_write;
+        }
+        bytes_sent += this_write;
+        buf += this_write;
+    }
+    return count;
 }

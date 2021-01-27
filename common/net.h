@@ -11,7 +11,8 @@
 #include <errno.h>			//errno
 
 
-const int MAX_FD_SZIE = 10000;
+const int MAX_FD_SIZE = 10000;
+const int LISTEN_FD_SIZE = 128;
 const int TCP_BUFF_SIZE = 1024 * 100;
 const int SNDBUF_RCVBUF_SIZE = 1024 * 32;
 

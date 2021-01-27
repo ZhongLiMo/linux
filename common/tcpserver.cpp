@@ -4,18 +4,26 @@
 #include "tcpclient.h"
 #include "tcppacket.h"
 
-TCPServer::TCPServer(int(*client_process)(TCPClient*)) : client_process(client_process)
+TCPServer::TCPServer(int(*clinetProcess)(TCPClient*, TCPPacket*)) : clinetProcess(clinetProcess), m_fd(0), m_eplfd(0)
 {
 }
 
-int TCPServer::initServer()
+TCPServer::~TCPServer()
 {
-    m_fd = listen_ip_port("127.0.0.1", "6389");
+	while (!m_clientset.empty())
+	{
+		closeClient(*m_clientset.begin());
+	}
+}
+
+int TCPServer::initServer(const char* ip, const char* port)
+{
+    m_fd = listen_ip_port(ip, port);
     if (m_fd <= 0)
     {
         return -1;
     }
-    m_eplfd = epoll_create_fd(MAX_FD_SZIE);
+    m_eplfd = epoll_create_fd(MAX_FD_SIZE);
     if (m_fd <= 0)
     {
         fd_close(m_fd);
@@ -28,7 +36,7 @@ int TCPServer::initServer()
 int TCPServer::onProcess()
 {
 	static TCPClient* client = NULL;
-    int fds = epoll_wait(m_eplfd, m_events, MAX_FD_SZIE, 0);
+    int fds = epoll_wait(m_eplfd, m_events, MAX_FD_SIZE, 0);
     if (fds > 0)
     {
         int i = 0;
@@ -37,9 +45,9 @@ int TCPServer::onProcess()
 			client = (TCPClient*)(m_events[i].data.ptr);
             if (client == NULL)
             {
-                //我叼你妈的这也能为空
+                //鎴戝徏浣犲鐨勮繖涔熻兘涓虹┖
             }
-            else if (client->fd() == m_fd)
+            else if (client->fd == m_fd)
             {
                 acceptClient();
             }
@@ -88,8 +96,8 @@ int TCPServer::closeClient(TCPClient* pClient)
 	{
 		return -1;
 	}
-	epoll_del(m_eplfd, pClient->fd());
-	close(pClient->fd());
+	epoll_del(m_eplfd, pClient->fd);
+	close(pClient->fd);
 	delete pClient;
 	return 0;
 }
@@ -99,7 +107,8 @@ int TCPServer::recvClient(TCPClient* pClient)
 	int result = 0;
 	if (pClient->tcppacket.cursize < TCP_HEAD_SIZE)
 	{
-		result = recv(pClient->fd(), &pClient->tcppacket.header, TCP_HEAD_SIZE - pClient->tcppacket.cursize, 0);
+		result = fd_read(pClient->fd, reinterpret_cast<char*>(pClient->tcppacket.header) + pClient->tcppacket.cursize, 
+							TCP_HEAD_SIZE - pClient->tcppacket.cursize);
 	}
 	else if (pClient->tcppacket.cursize == TCP_HEAD_SIZE && pClient->tcppacket.header.length == 0)
 	{
@@ -107,7 +116,8 @@ int TCPServer::recvClient(TCPClient* pClient)
 	}
 	else
 	{
-		result = recv(pClient->fd(), pClient->tcppacket.buffer, TCP_BUFF_SIZE - pClient->tcppacket.cursize - TCP_HEAD_SIZE, 0);
+		result = fd_read(pClient->fd, pClient->tcppacket.buffer + pClient->tcppacket.cursize - TCP_HEAD_SIZE,
+							TCP_BUFF_SIZE - pClient->tcppacket.cursize + TCP_HEAD_SIZE);
 	}
 
 	if (result == -1)
@@ -128,7 +138,8 @@ int TCPServer::recvClient(TCPClient* pClient)
 		if (pClient->tcppacket.cursize == (pClient->tcppacket.header.length + TCP_HEAD_SIZE))
 		{
 		ON_RECV_MSG:
-			if (client_process(pClient) < 0)
+			pClient->tcppacket.cursize -= TCP_HEAD_SIZE;
+			if (clinetProcess(pClient, &pClient->tcppacket) < 0)
 			{
 				return -1;
 			}

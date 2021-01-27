@@ -5,10 +5,10 @@
 #include <string>			//size_t
 
 /**
- * @brief 监听指定IP端口
+ * @brief 鐩戝惉鎸囧畾IP绔彛
  *
- * @param[in] ip 本端IP
- * @param[in] port 本端端口
+ * @param[in] ip 鏈IP
+ * @param[in] port 鏈绔彛
  *
  * @retval >0 -- successful, listen fd
  * @retval <=0 -- failed
@@ -17,8 +17,8 @@
  *
  * @see
  * 
- * @pre ip 不能为NULL
- * @pre port 不能为NULL
+ * @pre ip 涓嶈兘涓篘ULL
+ * @pre port 涓嶈兘涓篘ULL
  */
 int listen_ip_port(const char* sIP, const char* sPort);
 int create_socket();

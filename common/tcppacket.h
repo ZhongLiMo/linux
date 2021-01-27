@@ -12,6 +12,7 @@ struct TCPHeader
 	unsigned int uid;
 	unsigned short length;
 };
+#pragma pack(pop)
 
 const int TCP_HEAD_SIZE = sizeof(TCPHeader);
 
@@ -24,6 +25,5 @@ struct TCPPacket
 	unsigned short		cursize;
 	char				buffer[TCP_BUFF_SIZE];
 };
-#pragma pack(pop)
 
 #endif // !_TCP_PACKET_H_
