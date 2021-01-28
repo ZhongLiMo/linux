@@ -3,7 +3,7 @@
 
 static const int DEAFULT_TIMER_STAMP_MS = 10;
 
-extern TimerManager timer_manager;
+extern TimerManager timerManager;
 
 TimerManager::TimerManager() : next_time(0), change_iter(true), listeners(), timer_iter(listeners.end()), timer_stamp_ms(DEAFULT_TIMER_STAMP_MS)
 {
@@ -80,19 +80,19 @@ void TimerManager::RegisterTimer(Timer* timer)
 
 Timer::~Timer()
 {
-	timer_manager.RemoveTimer(this);
+	timerManager.RemoveTimer(this);
 }
 void Timer::StopTimer()
 {
-	timer_manager.RemoveTimer(this);
+	timerManager.RemoveTimer(this);
 }
 void Timer::StartTimer(int delay_time, bool loop)
 {
-	timer_manager.RemoveTimer(this);
+	timerManager.RemoveTimer(this);
 	if (delay_time < 0) return;
 	loop_time = loop ? delay_time : 0;
 	next_time = BASE_FUNC::GetCurTimeMS() + delay_time;
-	timer_manager.RegisterTimer(this);
+	timerManager.RegisterTimer(this);
 }
 void Timer::RestartTimer(int delay_time, bool loop)
 {

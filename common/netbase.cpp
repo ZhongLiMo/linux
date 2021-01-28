@@ -58,16 +58,16 @@ int create_socket()
 	return fd;
 }
 
-int listen_ip_port(const char* sIP, const char* sPort)
+int listen_ip_port(const char* ip, const char* port)
 {
-	if (sIP == NULL || sPort == NULL)
+	if (ip == NULL || port == NULL)
 	{
 		return -1;
 	}
 	struct sockaddr_in addr;
 	addr.sin_family = AF_INET;
-	addr.sin_port = htons(static_cast<uint16_t>(atoi(sPort)));
-	addr.sin_addr.s_addr = inet_addr(sIP);
+	addr.sin_port = htons(static_cast<uint16_t>(atoi(port)));
+	addr.sin_addr.s_addr = inet_addr(ip);
 
 	int fd = create_socket();
 	if (fd <= 0)
@@ -165,13 +165,40 @@ int fd_write(int sockfd, char *buf, size_t count)
         {
             this_write = write(sockfd, buf, count - bytes_sent);
         }
-        while ( (this_write < 0) && (errno == EINTR) );
+        while ((this_write < 0) && (errno == EINTR));
+
         if (this_write <= 0)
         {
             return this_write;
         }
+
         bytes_sent += this_write;
         buf += this_write;
     }
+
     return count;
+}
+
+int tcp_connect(const char*ip, const char* port)
+{
+    int fd;
+    struct sockaddr_in addr;
+    int iRet;
+
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd <= 0)
+    {
+        return fd;
+    }
+
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(static_cast<uint16_t>(atoi(port)));
+	addr.sin_addr.s_addr = inet_addr(ip);
+    iRet = connect(fd, (struct sockaddr *)&addr, sizeof(addr));
+    if (iRet < 0)
+    {
+        close(fd);
+        return -1;
+    }
+    return fd;
 }

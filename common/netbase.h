@@ -20,7 +20,7 @@
  * @pre ip 不能为NULL
  * @pre port 不能为NULL
  */
-int listen_ip_port(const char* sIP, const char* sPort);
+int listen_ip_port(const char* ip, const char* port);
 int create_socket();
 
 int set_socket(int fd);
@@ -34,7 +34,7 @@ int fd_close(int fd);
 int fd_read(int fd, char *buf, size_t len);
 int fd_write(int fd, char *buf, size_t len);
 
-
+int tcp_connect(const char* ip, const char* port);
 
 
 #endif //!_NET_BASE_H_

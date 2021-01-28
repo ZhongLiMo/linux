@@ -5,6 +5,7 @@ enum ClinetCMD
 {
     CMD_C_ERROR = 0,
     CMD_C_REGISTER_USER = 1,
+    CMD_C_TALK  = 2,
 };
 
 enum ServerCMD

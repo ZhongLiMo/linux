@@ -7,7 +7,7 @@ TCPClient::TCPClient(int fd) : m_fd(fd)
 
 }
 
-int TCPClient::sendToServer()
+int TCPClient::sendToClient()
 {
     if (tcppacket.safe_check() != 0)
     {

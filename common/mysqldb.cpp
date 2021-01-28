@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mylog.h"
+
+MyLog mysqllog("MYSQL", "../log");
+
 Field::operator short()
 {
 	if (MYSQL_TYPE_TINY == m_fieldType || MYSQL_TYPE_SHORT == m_fieldType || MYSQL_TYPE_LONG == m_fieldType || MYSQL_TYPE_LONGLONG == m_fieldType)
@@ -45,22 +49,6 @@ Field::operator std::string()
 		return m_strVal;
 	return "";
 }
-std::ostream& operator<<(std::ostream& os, const Field& field)
-{
-	// switch (field.m_fieldType)
-	// {
-	// case MYSQL_TYPE_TINY:           os << field.m_iVal;         break;
-	// case MYSQL_TYPE_SHORT:          os << field.m_iVal;         break;
-	// case MYSQL_TYPE_LONG:           os << field.m_lVal;         break;
-	// case MYSQL_TYPE_LONGLONG:       os << field.m_llVal;        break;
-	// case MYSQL_TYPE_FLOAT:          os << field.m_fVal;         break;
-	// case MYSQL_TYPE_DOUBLE:         os << field.m_dVal;         break;
-	// case MYSQL_TYPE_STRING:         os << field.m_strVal;       break;
-	// case MYSQL_TYPE_VAR_STRING:     os << field.m_strVal;       break;
-	// default:                        os << field.m_iVal;         break;
-	// }
-	return os;
-}
 void Field::Sprintfs(const Field& field, int& len, char(&strsql)[SQL_SIZE])
 {
 	switch (field.m_fieldType)
@@ -73,7 +61,7 @@ void Field::Sprintfs(const Field& field, int& len, char(&strsql)[SQL_SIZE])
 	case MYSQL_TYPE_DOUBLE:         len += snprintf(strsql + len, SQL_SIZE - len, "%f", field.m_dVal);             break;
 	case MYSQL_TYPE_STRING:         len += snprintf(strsql + len, SQL_SIZE - len, "'%s'", field.m_strVal.c_str()); break;
 	case MYSQL_TYPE_VAR_STRING:     len += snprintf(strsql + len, SQL_SIZE - len, "'%s'", field.m_strVal.c_str()); break;
-	default:                                                                                                        break;
+	default:                                                                                                       break;
 	}
 }
 void Field::GetField(enum_field_types fieldType, const char* val)
@@ -100,8 +88,6 @@ void Field::GetField(enum_field_types fieldType, const char* val)
 }
 
 template<typename Index, Index size, const char* tableName>
-bool Record<Index, size, tableName>::s_default = false;
-template<typename Index, Index size, const char* tableName>
 Record<Index, size, tableName> Record<Index, size, tableName>::s_defaultRecord;
 template<typename Index, Index size, const char* tableName>
 unsigned int Record<Index, size, tableName>::s_keyIndex = 0;
@@ -110,18 +96,18 @@ std::string Record<Index, size, tableName>::s_fieldsName[size];
 template<typename Index, Index size, const char* tableName>
 Record<Index, size, tableName>::Record(Key key)
 {
-	if (!Record::s_default)
-	{
-		char strsql[SQL_SIZE];
-		memset(strsql, 0, SQL_SIZE);
-		int len = snprintf(strsql, SQL_SIZE, "SELECT * FROM %s WHERE %s=0 LIMIT 1;", tableName, g_strKey);
-		MysqlDB::GetInstance()->InitDefaultRecord(strsql, *this);
-	}
 	for (size_t i = 0; i < size; ++i)
 	{
 		m_fieldArr[i] = Record::s_defaultRecord.m_fieldArr[i];
 	}
 	SetKey(key);
+}
+bool Record<Index, size, tableName>::InitDefaultRecord()
+{
+	char strsql[SQL_SIZE];
+	memset(strsql, 0, SQL_SIZE);
+	int len = snprintf(strsql, SQL_SIZE, "SELECT * FROM %s WHERE %s=0 LIMIT 1;", tableName, g_strKey);
+	MysqlDB::GetInstance()->InitDefaultRecord(strsql, *this);
 }
 template<typename Index, Index size, const char* tableName>
 Key Record<Index, size, tableName>::GetKey()
@@ -343,12 +329,11 @@ void Record<Index, size, tableName>::InitDefault(const MYSQL_FIELD* mysqlField, 
 template<typename RecordType>
 bool RecordTable<RecordType>::DeleteRecord(Key key, bool updateNow)
 {
-	typename std::unordered_map<Key, std::shared_ptr<RecordType>>::iterator ite = m_recordTable.find(key);
+	typename std::map<Key, std::shared_ptr<RecordType>>::iterator ite = m_recordTable.find(key);
 	if (ite == m_recordTable.end()) return true;
 	if (ite->second->Delete(updateNow))
 	{
 		m_recordTable.erase(ite);
-		m_keySet.erase(m_keySet.find(key));
 		return true;
 	}
 	return false;
@@ -360,7 +345,6 @@ bool RecordTable<RecordType>::InsertRecord(std::shared_ptr<RecordType> record, b
 	if (record->Insert(updateNow))
 	{
 		m_recordTable.insert(std::make_pair(record->GetKey(), record));
-		m_keySet.insert(record->GetKey());
 		return true;
 	}
 	return false;
@@ -371,7 +355,6 @@ void RecordTable<RecordType>::CreateTable(MYSQL_RES* mysqlRes, const MYSQL_FIELD
 	if (!mysqlField)
 		return;
 	m_recordTable.clear();
-	m_keySet.clear();
 	RecordType::InitDefault(mysqlField, fieldsNum);
 	for (size_t row = 0; row < rowsNum; ++row)
 	{
@@ -379,37 +362,24 @@ void RecordTable<RecordType>::CreateTable(MYSQL_RES* mysqlRes, const MYSQL_FIELD
 		std::shared_ptr<RecordType> record(RecordType::CreateNew());
 		record->GetFields(mysqlField, mysqlRow, fieldsNum);
 		m_recordTable.insert(std::make_pair(record->GetKey(), record));
-		m_keySet.insert(record->GetKey());
 	}
 }
 template<typename RecordType>
-typename std::unordered_map<Key, std::shared_ptr<RecordType>>::iterator RecordTable<RecordType>::find(Key key)
+typename std::map<Key, std::shared_ptr<RecordType>>::iterator RecordTable<RecordType>::find(Key key)
 {
 	return m_recordTable.find(key);
 }
 template<typename RecordType>
-typename std::unordered_map<Key, std::shared_ptr<RecordType>>::iterator RecordTable<RecordType>::begin()
+typename std::map<Key, std::shared_ptr<RecordType>>::iterator RecordTable<RecordType>::begin()
 {
 	return m_recordTable.begin();
 }
 template<typename RecordType>
-typename std::unordered_map<Key, std::shared_ptr<RecordType>>::iterator RecordTable<RecordType>::end()
+typename std::map<Key, std::shared_ptr<RecordType>>::iterator RecordTable<RecordType>::end()
 {
 	return m_recordTable.end();
 }
 
-void MysqlDB::Close() 
-{ 
-	if (!close_flag) 
-	{ 
-		close_flag = true; 
-		start_cond.notify_all();
-		update_thread.join(); 
-		if (m_mysql) 
-			mysql_close(m_mysql); 
-		m_mysql = NULL;
-	}
-}
 bool MysqlDB::MysqlQuery(const std::string& strsql)
 {
 	if (!m_mysql) 
@@ -423,7 +393,6 @@ bool MysqlDB::MysqlQuery(const std::string& strsql)
 }
 bool MysqlDB::MysqlQuery(const char(&strsql)[SQL_SIZE], bool updateNow)
 {
-	std::unique_lock <std::mutex> lck(mysql_mtx);
 	if (updateNow)
 	{
 		if (!m_mysql) 
@@ -437,14 +406,12 @@ bool MysqlDB::MysqlQuery(const char(&strsql)[SQL_SIZE], bool updateNow)
 	else
 	{
 		sql_list.push_back(strsql);
-		start_cond.notify_all();
 	}
 	return true;
 }
 template<typename RecordType>
 void MysqlDB::InitDefaultRecord(const char(&strsql)[SQL_SIZE], const RecordType& recordType)
 {
-	std::unique_lock <std::mutex> lck(mysql_mtx);
 	if (mysql_query(m_mysql, strsql))
 		mysqllog.SaveLog(LOG_FATAL, "sql(%s) query error(%s)", strsql, mysql_error(m_mysql));
 	m_mysqlRes = mysql_store_result(m_mysql);
@@ -459,7 +426,6 @@ template<typename RecordType>
 bool MysqlDB::Select(RecordTable<RecordType>& recordTable, const char* tableName, const char* WHERE, const char* ORDERBY, const char* ORDER)
 {
 	if (!tableName) return false;
-	std::unique_lock <std::mutex> lck(mysql_mtx);
 	if (!m_mysql) 
 		mysqllog.SaveLog(LOG_FATAL, "mysql not connect");
 	static char strsql[SQL_SIZE];
@@ -488,42 +454,17 @@ bool MysqlDB::Select(RecordTable<RecordType>& recordTable, const char* tableName
 }
 void MysqlDB::Connect(const char* host, const char* user, const char* passwd, const char* dbname, unsigned int port, const char* unixSocket, unsigned long clientFlag)
 {
-	static std::once_flag once;
-	std::call_once(once, [&]
+	m_mysql = mysql_init(m_mysql);
+	if (mysql_options(m_mysql, MYSQL_SET_CHARSET_NAME, g_encoding))
+		mysqllog.SaveLog(LOG_FATAL, "mysql set option error");
+	char arg = 1;
+	if (mysql_options(m_mysql, MYSQL_OPT_RECONNECT, &arg))
+		mysqllog.SaveLog(LOG_FATAL, "mysql set option error");
+	if (!mysql_real_connect(m_mysql, host, user, passwd, dbname, port, unixSocket, clientFlag) || mysql_query(m_mysql, "set wait_timeout=86400") || mysql_query(m_mysql, "set interactive_timeout=86400"))
 	{
-		m_mysql = mysql_init(m_mysql);
-		if (mysql_options(m_mysql, MYSQL_SET_CHARSET_NAME, g_encoding))
-			mysqllog.SaveLog(LOG_FATAL, "mysql set option error");
-		char arg = 1;
-		if (mysql_options(m_mysql, MYSQL_OPT_RECONNECT, &arg))
-			mysqllog.SaveLog(LOG_FATAL, "mysql set option error");
-		if (!mysql_real_connect(m_mysql, host, user, passwd, dbname, port, unixSocket, clientFlag) || mysql_query(m_mysql, "set wait_timeout=86400") || mysql_query(m_mysql, "set interactive_timeout=86400"))
-		{
-			mysqllog.SaveLog(LOG_ERROR, "mysql connect error(%s)", mysql_error(m_mysql));
-			mysql_close(m_mysql);
-			m_mysql = NULL;
-			mysqllog.SaveLog(LOG_FATAL, "mysql connect error");
-		}
-	});
-}
-void MysqlDB::UpdateThread()
-{
-	while (!close_flag)
-	{
-		mysql_mtx.lock();
-		start_cond.wait(mysql_mtx, [&] { return !sql_list.empty() || close_flag; });
-		if (close_flag)
-		{
-			while (!sql_list.empty())
-			{
-				MysqlQuery(sql_list.front());
-				sql_list.pop_front();
-			}
-			mysql_mtx.unlock();
-			return;
-		}
-		MysqlQuery(sql_list.front());
-		sql_list.pop_front();
-		mysql_mtx.unlock();
+		mysqllog.SaveLog(LOG_ERROR, "mysql connect error(%s)", mysql_error(m_mysql));
+		mysql_close(m_mysql);
+		m_mysql = NULL;
+		mysqllog.SaveLog(LOG_FATAL, "mysql connect error");
 	}
 }

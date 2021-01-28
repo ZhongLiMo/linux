@@ -3,9 +3,7 @@
 #include "tcpclient.h"
 #include "cscmd.h"
 #include "mysqldb.h"
-#include "all_table_date.h"
-
-extern RecordTable<UserRecord> userTable;		//完整的表
+#include "mysqltable.h"
 
 int deal_client_msg(TCPClient* pTCPClient, TCPPacket* pTCPPacket)
 {
@@ -26,6 +24,11 @@ int deal_client_msg(TCPClient* pTCPClient, TCPPacket* pTCPPacket)
             std::shared_ptr<UserRecord> pUserRecord = UserRecord::CreateNew(userTable.GetNewKey());
             pUserRecord->SetString(USER_TABLE_NAME, std::string(user.name));
             userTable.InsertRecord(pUserRecord);
+        }
+        break;
+    case CMD_C_TALK:
+        {
+
         }
         break;
     default:

@@ -7,7 +7,7 @@
 #include <iostream>
 
 #define SERVER_ADDRESS      "127.0.0.1"  
-#define SERVER_PORT         (6388)  
+#define SERVER_PORT         "6388"  
 
 #define SOCKET_NUM          120       /// 客户端socket的个数,修改该值可以改变连接到服务器的客户端个数  
 
@@ -17,26 +17,10 @@ char g_szBuf[512] = "";
 
 int main()
 {
-	int iSock;
-    struct sockaddr_in stSvrAddr;
-    int iRet;
-
-    iSock =  create_socket();
-    if (iSock <= 0)
-    {
-        printf("error: socket()\n");
-        return iSock;
-    }
-
-    bzero(&stSvrAddr, sizeof(stSvrAddr));
-    stSvrAddr.sin_family = AF_INET;
-    stSvrAddr.sin_port = htons(SERVER_PORT);
-    stSvrAddr.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
-    iRet = connect(iSock, (struct sockaddr *)&stSvrAddr, sizeof(stSvrAddr));
-    if (iRet < 0)
+	int iSock = tcp_connect(SERVER_ADDRESS, SERVER_PORT);
+    if (iSock < 0)
     {
         printf("error: connect()\n");
-        close(iSock);
         return -1;
     }
 
@@ -55,7 +39,7 @@ int main()
 		else
 		{
 			client.tcppacket.pack_packet(szInput, sizeof(szInput), cmd);
-			client.sendToServer();
+			client.sendToClient();
 		}
 
 		if (fd_read(iSock, szInput, sizeof(szInput)))

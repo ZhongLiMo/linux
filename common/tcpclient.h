@@ -7,7 +7,7 @@ class TCPClient
 {
 public:
 	TCPClient(int fd);
-	int sendToServer();
+	int sendToClient();
 public:
     int m_fd;
 	TCPPacket tcppacket;

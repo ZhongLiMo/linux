@@ -7,21 +7,32 @@
 #include <list>
 #include <string>
 #include <memory>
-#include <unordered_map>
-#include <thread>
-#include <mutex>
-#include <atomic>
-#include <condition_variable>
-
-#include "mylog.h"
-
-MyLog mysqllog("MYSQL", "../log");
+#include <map>
 
 typedef long long	Key;
 const Key			g_key = 20200001;
 const char*			g_strKey = "id";
 const char*			g_encoding = "GBK";
 const unsigned int	SQL_SIZE = 1024;
+
+/**
+ * @example
+enum TEST_USER
+{
+	TEST_USER_ID,
+	TEST_USER_NAME,
+	TEST_USER_NICKNAME,
+	TEST_USER_SEX,
+	TEST_USER_MAX,
+}; 
+const char tableName[] = "test_user";
+typedef DBRecord<TEST_USER, TEST_USER_MAX, tableName> Record;	//行数据类
+typedef DBTble<Record> Table;									//表数据类
+Table userTable;												//表对象
+Record::InitDefaultRecord();									//初始化表默认行数据
+DBHandle->Select(userTable, tableName);							//SELECT所有数据
+auto userRecord = Record::CreateNew(userTable.GetNewKey());		//行数据RAII指针
+ */
 
 class Field
 {
@@ -34,7 +45,6 @@ private:
 	operator double();
 	operator std::string();
 	void GetField(enum_field_types fieldType, const char* val);
-	friend std::ostream& operator<<(std::ostream& os, const Field& field);
 	static void Sprintfs(const Field& field, int& len, char(&strsql)[SQL_SIZE]);
 private:
 	Field() {}
@@ -55,6 +65,7 @@ private:
 	template<typename Index, Index size, const char* tableName>
 	friend class Record;
 };
+
 template<typename Index, Index size, const char* tableName>
 class Record
 {
@@ -77,6 +88,7 @@ public:
 	size_t Size() const;
 	const Field& operator[](unsigned int index) const;
 	static std::shared_ptr<Record> CreateNew(Key key) { return std::shared_ptr<Record>(new Record(key)); }
+	static bool InitDefaultRecord();
 private:
 	bool Insert(bool updateNow);
 	bool Delete(bool updateNow);
@@ -95,11 +107,11 @@ private:
 	friend class RecordTable;
 	friend class MysqlDB;
 private:
-	static bool				s_default;
 	static Record			s_defaultRecord;
 	static unsigned int		s_keyIndex;
 	static std::string		s_fieldsName[size];
 };
+
 template<typename RecordType>
 class RecordTable
 {
@@ -109,21 +121,21 @@ public:
 	size_t Size() const { return m_recordTable.size(); }
 	bool DeleteRecord(Key key, bool updateNow = false);
 	bool InsertRecord(std::shared_ptr<RecordType>record, bool updateNow = false);
-	Key GetNewKey() const { if (m_keySet.empty()) return g_key; return *m_keySet.rbegin() + 1; }
+	Key GetNewKey() const { if (m_recordTable.empty()) return g_key; return m_recordTable.rbegin()->first + 1; }
 public:
-	typename std::unordered_map<Key, std::shared_ptr<RecordType>>::iterator find(Key key);
-	typename std::unordered_map<Key, std::shared_ptr<RecordType>>::iterator begin();
-	typename std::unordered_map<Key, std::shared_ptr<RecordType>>::iterator end();
+	typename std::map<Key, std::shared_ptr<RecordType>>::iterator find(Key key);
+	typename std::map<Key, std::shared_ptr<RecordType>>::iterator begin();
+	typename std::map<Key, std::shared_ptr<RecordType>>::iterator end();
 private:
 	RecordTable(const RecordTable&) = delete;
 	RecordTable& operator=(const RecordTable&) = delete;
 private:
 	void CreateTable(MYSQL_RES* mysqlRes, const MYSQL_FIELD* mysqlField, MYSQL_ROW& mysqlRow, unsigned int fieldsNum, size_t rowsNum);
 private:
-	std::set<Key>											m_keySet;
-	std::unordered_map<Key, std::shared_ptr<RecordType>>	m_recordTable;
+	std::map<Key, std::shared_ptr<RecordType>>	m_recordTable;
 	friend class MysqlDB;
 };
+
 class MysqlDB
 {
 public:
@@ -132,7 +144,6 @@ public:
 		static MysqlDB mysqldb;
 		return &mysqldb;
 	}
-	void Close();
 	template<typename RecordType>
 	bool Select(RecordTable<RecordType>& recordTable, const char* tableName, const char* WHERE = NULL, const char* ORDERBY = NULL, const char* ORDER = "ASC");
 	void Connect(const char* host, const char* user, const char* passwd, const char* dbname, unsigned int port = MYSQL_PORT, const char* unixSocket = NULL, unsigned long clientFlag = 0);
@@ -142,9 +153,8 @@ private:
 	template<typename RecordType>
 	void InitDefaultRecord(const char(&strsql)[SQL_SIZE], const RecordType& recordType);
 private:
-	MysqlDB() : m_mysql(NULL), m_mysqlRes(NULL), m_mysqlRow(NULL), m_mysqlField(NULL), 
-		close_flag(false), update_thread(&MysqlDB::UpdateThread, this){}
-	virtual ~MysqlDB() { Close(); }
+	MysqlDB() : m_mysql(NULL), m_mysqlRes(NULL), m_mysqlRow(NULL), m_mysqlField(NULL) {}
+	virtual ~MysqlDB() { mysql_close(m_mysql); m_mysql = NULL; }
 	MysqlDB(const MysqlDB&) = delete;
 	MysqlDB& operator=(const MysqlDB&) = delete;
 private:
@@ -152,15 +162,9 @@ private:
 	MYSQL_RES*					m_mysqlRes;
 	MYSQL_ROW					m_mysqlRow;
 	MYSQL_FIELD*				m_mysqlField;
+	std::list<std::string>		sql_list;
 	template<typename Index, Index size, const char* tableName>
 	friend class Record;
-private:
-	void UpdateThread();
-	std::mutex					mysql_mtx;
-	std::list<std::string>		sql_list;
-	std::atomic_bool			close_flag;
-	std::condition_variable_any	start_cond;
-	std::thread					update_thread;
 };
 
 #define DBHandle (MysqlDB::GetInstance())

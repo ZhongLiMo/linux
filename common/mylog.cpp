@@ -8,7 +8,7 @@
 
 static const std::string log_level_str[6] = { "fatal", "error", "warn " , "info " ,"proto", "debug" };
 
-MyLog::MyLog(std::string file_name, std::string file_dir, long max_size, LOG_LEVEL log_level) :
+MyLog::MyLog(const std::string& file_name, const std::string& file_dir, long max_size, LOG_LEVEL log_level) :
 	m_max_size(max_size), m_log_file(NULL), m_file_name(file_name), 
 	m_file_dir(file_dir), m_log_level(log_level)
 {

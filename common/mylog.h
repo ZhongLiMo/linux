@@ -25,7 +25,7 @@ enum LOG_LEVEL
 class MyLog
 {
 public:
-	MyLog(std::string file_name, std::string file_dir, long max_size = 1024 * 1024 * 100, LOG_LEVEL log_level = LOG_LEVEL_DEBUG);
+	MyLog(const std::string& file_name, const std::string& file_dir, long max_size = 1024 * 1024 * 100, LOG_LEVEL log_level = LOG_LEVEL_DEBUG);
 	virtual ~MyLog();
 public:
 	void SaveLog(LOG_LEVEL log_level, int line, const char *func, const char *format, ...);
