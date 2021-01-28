@@ -1,7 +1,7 @@
 #ifndef MYSQLDB_H
 #define MYSQLDB_H
 
-#include "../mysqld-8.0/include/mysql.h"
+#include <mysql.h>
 
 #include <set>
 #include <list>
@@ -151,10 +151,10 @@ private:
 	bool MysqlQuery(const std::string& strsql);
 	bool MysqlQuery(const char(&strsql)[SQL_SIZE], bool updateNow);
 	template<typename RecordType>
-	void InitDefaultRecord(const char(&strsql)[SQL_SIZE], const RecordType& recordType);
+	void InitDefaultRecord(const char(&strsql)[SQL_SIZE]);
 private:
 	MysqlDB() : m_mysql(NULL), m_mysqlRes(NULL), m_mysqlRow(NULL), m_mysqlField(NULL) {}
-	virtual ~MysqlDB() { mysql_close(m_mysql); m_mysql = NULL; }
+	virtual ~MysqlDB() { if (m_mysql) mysql_close(m_mysql); m_mysql = NULL; }
 	MysqlDB(const MysqlDB&) = delete;
 	MysqlDB& operator=(const MysqlDB&) = delete;
 private:

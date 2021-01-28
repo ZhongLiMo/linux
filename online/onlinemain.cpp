@@ -14,7 +14,7 @@ TimerManager timerManager;
 int main(int argc, char *argv[])
 {
     timerManager.InitTimer(10);
-    mysqldb->Connect("127.0.0.1", "root", "M:ppujV+u4wr", "test");
+    mysqldb->Connect("127.0.0.1", "root", "123456", "test");
 
     if (init_mysql_data() < 0)
     {

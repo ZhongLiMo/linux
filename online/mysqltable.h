@@ -11,9 +11,13 @@ enum UserTableField
     USER_TABLE_NAME = 1,
     USER_TABLE_MAX  = 2,
 };
-const char* userTableName;
+
+
+char userTableName[] = "test_user";
+
 typedef DBRecord<UserTableField, USER_TABLE_MAX, userTableName> UserRecord;
-typedef DBTble<Record> UserTable;
+typedef DBTble<UserRecord> UserTable;
+
 UserTable userTable;
 
 #endif // !_MYSQL_TABLE_H_

@@ -5,6 +5,6 @@ class TCPClient;
 class TCPPacket;
 
 int deal_client_msg(TCPClient* pTCPClient, TCPPacket* pTCPPacket);
-
+int main(int argc, char *argv[]);
 
 #endif // !_ONLINE_MAIN_H_

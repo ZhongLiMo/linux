@@ -16,22 +16,21 @@ YES = X
 
 ## 可能需要修改的文件配置 ##
 #库文件目录
-LIBS = -L/usr/lib -L../common 
+LIBS = -L/usr/lib -L/usr/lib64/mysql -L../common
 #具体库文件
-LIBS += -lstdc++ -lcommon
+LIBS += -lstdc++ -lmysqlclient -lcommon
 #c++头文件目录
-INCPATH = -I/usr/include -I../common
+INCPATH = -I/usr/include -I/usr/include/mysql -I../common
 #目标文件
-TARGET = main
+TARGET = test
 #依赖文件
-OBJECTS = onlinemain.o online_process_client.o
+OBJECTS = mysqltable.o onlinemain.o online_process_client.o
 
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	@if [ $(YES) = $(findstring lib, $(TARGET))$(YES) ]; then \
-		echo $(LIBS);\
-		$(CXX) $(CXXFLAGS) $(INCPATH) -o $@ $< $(LIBS); \
+		$(CXX) $(CXXFLAGS) $(INCPATH) -o $@ $^ $(LIBS); \
 	else \
 		$(AR) $(TARGET) $(OBJECTS); \
 	fi

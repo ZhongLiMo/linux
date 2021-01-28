@@ -16,21 +16,21 @@ YES = X
 
 ## 可能需要修改的文件配置 ##
 #库文件目录
-LIBS = -L/usr/lib -L../common 
+LIBS =
 #具体库文件
-LIBS += -lstdc++ -lcommon
+LIBS +=
 #c++头文件目录
-INCPATH = -I/usr/include -I../common
+INCPATH = -I/usr/include -I/usr/include/mysql
 #目标文件
 TARGET = libcommon.a
 #依赖文件
-OBJECTS = mysqldb.o netbase.o tcpclient.o tcppacket.o tcpserver.o mylog.o basefunc.o
+OBJECTS = mysqldb.o netbase.o tcpclient.o tcppacket.o tcpserver.o mylog.o basefunc.o timer.o
 
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	@if [ $(YES) = $(findstring lib, $(TARGET))$(YES) ]; then \
-		$(CXX) $(CXXFLAGS) $(INCPATH) -o $@ $< $(LIBS); \
+		$(CXX) $(CXXFLAGS) $(INCPATH) -o $@ $^ $(LIBS); \
 	else \
 		$(AR) $(TARGET) $(OBJECTS); \
 	fi

@@ -5,6 +5,19 @@
 #include "mysqldb.h"
 #include "mysqltable.h"
 
+#include "mysqldb.cpp"
+
+int init_mysql_data()
+{
+    if (!UserRecord::InitDefaultRecord() || !DBHandle->Select(userTable, userTableName))
+    {
+        return -1;
+    }
+    return 0;
+}
+
+
+
 int deal_client_msg(TCPClient* pTCPClient, TCPPacket* pTCPPacket)
 {
     switch (pTCPPacket->header.cmd)

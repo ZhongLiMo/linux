@@ -102,12 +102,14 @@ Record<Index, size, tableName>::Record(Key key)
 	}
 	SetKey(key);
 }
+template<typename Index, Index size, const char* tableName>
 bool Record<Index, size, tableName>::InitDefaultRecord()
 {
 	char strsql[SQL_SIZE];
 	memset(strsql, 0, SQL_SIZE);
-	int len = snprintf(strsql, SQL_SIZE, "SELECT * FROM %s WHERE %s=0 LIMIT 1;", tableName, g_strKey);
-	MysqlDB::GetInstance()->InitDefaultRecord(strsql, *this);
+	snprintf(strsql, SQL_SIZE, "SELECT * FROM %s WHERE %s=0 LIMIT 1;", tableName, g_strKey);
+	MysqlDB::GetInstance()->InitDefaultRecord<Record>(strsql);
+	return true;
 }
 template<typename Index, Index size, const char* tableName>
 Key Record<Index, size, tableName>::GetKey()
@@ -209,7 +211,7 @@ std::string Record<Index, size, tableName>::GetString(Index index) const
 {
 	if (MYSQL_TYPE_STRING == m_fieldArr[index].m_fieldType || MYSQL_TYPE_VAR_STRING == m_fieldArr[index].m_fieldType)
 		return m_fieldArr[index].m_strVal;
-	return -1;
+	return "";
 }
 template<typename Index, Index size, const char* tableName>
 void Record<Index, size, tableName>::SetString(Index index, const std::string& val)
@@ -311,7 +313,6 @@ void Record<Index, size, tableName>::GetFields(const MYSQL_FIELD* mysqlField, co
 template<typename Index, Index size, const char* tableName>
 void Record<Index, size, tableName>::InitDefault(const MYSQL_FIELD* mysqlField, unsigned int fieldsNum)
 {
-	if (Record::s_default) return;
 	if (fieldsNum != static_cast<unsigned int>(size))
 		mysqllog.SaveLog(LOG_FATAL, "%s fieldsNum is not equal to size", tableName);
 	for (unsigned int i = 0; i < fieldsNum; ++i)
@@ -323,7 +324,6 @@ void Record<Index, size, tableName>::InitDefault(const MYSQL_FIELD* mysqlField, 
 		Record::s_fieldsName[i] = mysqlField[i].name;
 		Record::s_defaultRecord.m_fieldArr[i].GetField(mysqlField[i].type, mysqlField[i].def);
 	}
-	Record::s_default = true;
 }
 
 template<typename RecordType>
@@ -410,7 +410,7 @@ bool MysqlDB::MysqlQuery(const char(&strsql)[SQL_SIZE], bool updateNow)
 	return true;
 }
 template<typename RecordType>
-void MysqlDB::InitDefaultRecord(const char(&strsql)[SQL_SIZE], const RecordType& recordType)
+void MysqlDB::InitDefaultRecord(const char(&strsql)[SQL_SIZE])
 {
 	if (mysql_query(m_mysql, strsql))
 		mysqllog.SaveLog(LOG_FATAL, "sql(%s) query error(%s)", strsql, mysql_error(m_mysql));

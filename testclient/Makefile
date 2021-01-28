@@ -30,8 +30,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	@if [ $(YES) = $(findstring lib, $(TARGET))$(YES) ]; then \
-		echo $(LIBS);\
-		$(CXX) $(CXXFLAGS) $(INCPATH) -o $@ $< $(LIBS); \
+		$(CXX) $(CXXFLAGS) $(INCPATH) -o $@ $^ $(LIBS); \
 	else \
 		$(AR) $(TARGET) $(OBJECTS); \
 	fi
