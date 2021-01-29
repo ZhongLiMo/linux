@@ -4,6 +4,8 @@
 #include <string.h>
 
 #include "mylog.h"
+const char*			g_strKey = "id";
+const char*			g_encoding = "GBK";
 
 MyLog mysqllog("MYSQL", "../log");
 
@@ -211,7 +213,7 @@ std::string Record<Index, size, tableName>::GetString(Index index) const
 {
 	if (MYSQL_TYPE_STRING == m_fieldArr[index].m_fieldType || MYSQL_TYPE_VAR_STRING == m_fieldArr[index].m_fieldType)
 		return m_fieldArr[index].m_strVal;
-	return "";
+	return std::string("");
 }
 template<typename Index, Index size, const char* tableName>
 void Record<Index, size, tableName>::SetString(Index index, const std::string& val)

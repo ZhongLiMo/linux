@@ -11,8 +11,8 @@
 
 typedef long long	Key;
 const Key			g_key = 20200001;
-const char*			g_strKey = "id";
-const char*			g_encoding = "GBK";
+extern const char*			g_strKey;
+extern const char*			g_encoding;
 const unsigned int	SQL_SIZE = 1024;
 
 /**

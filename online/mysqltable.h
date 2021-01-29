@@ -1,3 +1,4 @@
+#pragma once
 #ifndef _MYSQL_TABLE_H_
 #define _MYSQL_TABLE_H_
 
@@ -13,11 +14,5 @@ enum UserTableField
 };
 
 
-char userTableName[] = "test_user";
-
-typedef DBRecord<UserTableField, USER_TABLE_MAX, userTableName> UserRecord;
-typedef DBTble<UserRecord> UserTable;
-
-UserTable userTable;
 
 #endif // !_MYSQL_TABLE_H_

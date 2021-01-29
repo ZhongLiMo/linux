@@ -7,6 +7,16 @@
 
 #include "mysqldb.cpp"
 
+
+extern char userTableName[];
+
+
+
+typedef DBRecord<UserTableField, USER_TABLE_MAX, userTableName> UserRecord;
+typedef DBTble<UserRecord> UserTable;
+
+extern UserTable userTable;
+
 int init_mysql_data()
 {
     if (!UserRecord::InitDefaultRecord() || !DBHandle->Select(userTable, userTableName))
@@ -31,12 +41,13 @@ int deal_client_msg(TCPClient* pTCPClient, TCPPacket* pTCPPacket)
                 if (strcmp(ite->second->GetString(USER_TABLE_NAME).c_str(), user.name) == 0)
                 {
                     //已有用户
+                    printf("c_str[%s] user.name[%s]", ite->second->GetString(USER_TABLE_NAME).c_str(), user.name);
                     return -1;
                 }
             }
             std::shared_ptr<UserRecord> pUserRecord = UserRecord::CreateNew(userTable.GetNewKey());
             pUserRecord->SetString(USER_TABLE_NAME, std::string(user.name));
-            userTable.InsertRecord(pUserRecord);
+            userTable.InsertRecord(pUserRecord, true);
         }
         break;
     case CMD_C_TALK:
@@ -45,6 +56,8 @@ int deal_client_msg(TCPClient* pTCPClient, TCPPacket* pTCPPacket)
         }
         break;
     default:
+        printf("cmd:[%d] lenth[%d] body[%s]", pTCPPacket->header.cmd, pTCPPacket->header.length, pTCPPacket->buffer);
+        pTCPClient->sendToClient();
         break;
     }
     return 0;
