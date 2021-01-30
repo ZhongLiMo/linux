@@ -1,5 +1,5 @@
-#ifndef _SERVER_H_
-#define _SERVER_H_
+#ifndef _TCP_SERVER_H_
+#define _TCP_SERVER_H_
 
 class TCPClient;
 class TCPPacket;
@@ -28,4 +28,4 @@ private:
 	int(*clinetProcess)(TCPClient*, TCPPacket*);
 };
 
-#endif  //!_SERVER_H_
+#endif  //!_TCP_SERVER_H_

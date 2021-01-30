@@ -2,7 +2,6 @@
 
 #include "timer.h"
 #include "tcpserver.h"
-#include "mysqldb.h"
 #include "mysqltable.h"
 
 

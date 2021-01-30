@@ -32,7 +32,7 @@ $(TARGET): $(OBJECTS)
 	@if [ $(YES) = $(findstring lib, $(TARGET))$(YES) ]; then \
 		$(CXX) $(CXXFLAGS) $(INCPATH) -o $@ $^ $(LIBS); \
 	else \
-		$(AR) $(TARGET) $(OBJECTS); \
+		$(AR) $@ $^; \
 	fi
 	
 ## 隐式规则 ##

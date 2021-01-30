@@ -2,30 +2,7 @@
 
 #include "tcpclient.h"
 #include "cscmd.h"
-#include "mysqldb.h"
 #include "mysqltable.h"
-
-#include "mysqldb.cpp"
-
-
-extern char userTableName[];
-
-
-
-typedef DBRecord<UserTableField, USER_TABLE_MAX, userTableName> UserRecord;
-typedef DBTble<UserRecord> UserTable;
-
-extern UserTable userTable;
-
-int init_mysql_data()
-{
-    if (!UserRecord::InitDefaultRecord() || !DBHandle->Select(userTable, userTableName))
-    {
-        return -1;
-    }
-    return 0;
-}
-
 
 
 int deal_client_msg(TCPClient* pTCPClient, TCPPacket* pTCPPacket)

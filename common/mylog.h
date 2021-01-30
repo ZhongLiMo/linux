@@ -1,9 +1,10 @@
-#ifndef MYLOG_H
-#define MYLOG_H
+#ifndef _MYLOG_H_
+#define _MYLOG_H_
 
 #include <string>
 
-const int LOG_BUF_SIZE = 1024*100;
+const int LOG_BUF_SIZE = 1024 * 100;
+const int LOG_MAX_SIZE = 1024 * 1024 * 1000;
 
 enum LOG_LEVEL
 {
@@ -47,4 +48,4 @@ private:
 	char				m_format_buf[LOG_BUF_SIZE];
 };
 
-#endif // !MYLOG_H
+#endif // !_MYLOG_H_
