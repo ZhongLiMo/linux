@@ -28,9 +28,9 @@ bool CLuaScript::Init()
 	{
 		m_ls = luaL_newstate();
 		CHECKF(m_ls);
-		luaL_openlibs(m_ls);		// ¼ÓÔØÄ¬ÈÏ¿â
-		RegisterFunctions();		// ×¢²á×Ô¶¨Òåº¯Êý
-		CHECKF(LoadAllScript());	// ¼ÓÔØËùÓÐ½Å±¾
+		luaL_openlibs(m_ls);		// åŠ è½½é»˜è®¤åº“
+		RegisterFunctions();		// æ³¨å†Œè‡ªå®šä¹‰å‡½æ•°
+		CHECKF(LoadAllScript());	// åŠ è½½æ‰€æœ‰è„šæœ¬
 	}
 	return true;
 }
@@ -73,7 +73,7 @@ bool CLuaScript::LoadFile(const char *filename)
 	lua_State *L = m_ls;
 	int n = 0;
 
-	// ¼ÓÔØ½Å±¾ÎÄ¼þ
+	// åŠ è½½è„šæœ¬æ–‡ä»¶
 	n = lua_gettop(m_ls);
 	int ret = luaL_loadfile(m_ls, filename);
 	if (ret != 0)
@@ -81,19 +81,19 @@ bool CLuaScript::LoadFile(const char *filename)
 		const char *err = lua_tostring(m_ls, -1);
 		int n = lua_gettop(m_ls);
 
-		//LOGERROR("¼ÓÔØ½Å±¾%s´íÎó,reason:%s", filename, err);
-		printf("¼ÓÔØ½Å±¾%s´íÎó,reason:%s", filename, err);
+		//LOGERROR("åŠ è½½è„šæœ¬%sé”™è¯¯,reason:%s", filename, err);
+		printf("åŠ è½½è„šæœ¬%sé”™è¯¯,reason:%s", filename, err);
 		lua_pop(m_ls, 1);
 		return false;
 	}
 
 	ret = lua_pcall(m_ls, 0, LUA_MULTRET, 0);
-	// Èç¹û·¢Éú´íÎó£¬»Ö¸´¶ÑÕ»
+	// å¦‚æžœå‘ç”Ÿé”™è¯¯ï¼Œæ¢å¤å †æ ˆ
 	if (ret != 0)
 	{
 		const char *err = lua_tostring(m_ls, -1);
-		//LOGLUA("Ö´ÐÐ½Å±¾%s´íÎó,reason:%s", filename, err);
-		printf("¼ÓÔØ½Å±¾%s´íÎó,reason:%s", filename, err);
+		//LOGLUA("æ‰§è¡Œè„šæœ¬%sé”™è¯¯,reason:%s", filename, err);
+		printf("åŠ è½½è„šæœ¬%sé”™è¯¯,reason:%s", filename, err);
 		lua_pop(m_ls, 1);
 		return false;
 	}
@@ -102,12 +102,12 @@ bool CLuaScript::LoadFile(const char *filename)
 }
 
 /*
- * Ö´ÐÐ½Å±¾º¯Êý
+ * æ‰§è¡Œè„šæœ¬å‡½æ•°
  *
- * @param[in]   funcName: ½Å±¾ÖÐµÄº¯ÊýÃû
- * @param[in]   format: ¸ñÊ½»¯£¬ÐÎÊ½£ºintype[>outtype]£¬ÓÐÐ§typeÎª£ºb ²¼¶û£¬d/i ÕûÐÍ£¬f Ë«¾«¶È£¬s ×Ö·û´®, u ÎÞ·ûºÅÕûÊý
- *                      ÆäÖÐ£¬²¼¶ûÐÍÔÚ²ÎÊý´«µÝÊ±ÈÔÈ»ÒÔÕûÐÍ£¨int£©×÷ÎªÔØÌå£¬0 Îª false£¬·Ç 0 Îª true
- *                      Êä³öÊ±±ØÐëÎª±äÁ¿µØÖ·£»Èç¹ûÐèÒªÊä³ö×Ö·û´®£¬Ôò±ØÐëÒÔ×Ö·û»º´æµØÖ·¡¢×Ö·û»º´æ³¤¶ÈÅä¶ÔÊäÈë
+ * @param[in]   funcName: è„šæœ¬ä¸­çš„å‡½æ•°å
+ * @param[in]   format: æ ¼å¼åŒ–ï¼Œå½¢å¼ï¼šintype[>outtype]ï¼Œæœ‰æ•ˆtypeä¸ºï¼šb å¸ƒå°”ï¼Œd/i æ•´åž‹ï¼Œf åŒç²¾åº¦ï¼Œs å­—ç¬¦ä¸², u æ— ç¬¦å·æ•´æ•°
+ *                      å…¶ä¸­ï¼Œå¸ƒå°”åž‹åœ¨å‚æ•°ä¼ é€’æ—¶ä»ç„¶ä»¥æ•´åž‹ï¼ˆintï¼‰ä½œä¸ºè½½ä½“ï¼Œ0 ä¸º falseï¼Œéž 0 ä¸º true
+ *                      è¾“å‡ºæ—¶å¿…é¡»ä¸ºå˜é‡åœ°å€ï¼›å¦‚æžœéœ€è¦è¾“å‡ºå­—ç¬¦ä¸²ï¼Œåˆ™å¿…é¡»ä»¥å­—ç¬¦ç¼“å­˜åœ°å€ã€å­—ç¬¦ç¼“å­˜é•¿åº¦é…å¯¹è¾“å…¥
  */
 bool CLuaScript::ExecuteFunction(const char* szLuaFunction, const char *format, ...)
 {
@@ -125,7 +125,7 @@ bool CLuaScript::ExecuteFunction(const char* szLuaFunction, const char *format, 
 }
 
 ///////////////////////////////////////////////////////////
-// ´Ëº¯Êý²»ÄÜ´«µÝ·µ»ØÖµ
+// æ­¤å‡½æ•°ä¸èƒ½ä¼ é€’è¿”å›žå€¼
 bool CLuaScript::ExecuteFunction2(const char* szLuaFunction, const char* format, const char* szParam)
 {
 	CHECKF(szLuaFunction);
@@ -133,17 +133,17 @@ bool CLuaScript::ExecuteFunction2(const char* szLuaFunction, const char* format,
 
 	lua_State*& ls = m_ls;
 	const char *p = format;
-	int na = 0;                         // ²ÎÊý¸öÊý
+	int na = 0;                         // å‚æ•°ä¸ªæ•°
 
 	//DEBUG_TRY
 		istringstream in(szParam);
 
-	// ¼ì²é¶ÑÕ»
+	// æ£€æŸ¥å †æ ˆ
 	int n = lua_gettop(ls);
-	// Ñ¹Èë½Å±¾º¯Êý
+	// åŽ‹å…¥è„šæœ¬å‡½æ•°
 	lua_getglobal(ls, szLuaFunction);
 
-	// Ñ¹Èë²ÎÊý
+	// åŽ‹å…¥å‚æ•°
 	if (p)
 	{
 		for (; *p != 0; ++p)
@@ -200,8 +200,8 @@ bool CLuaScript::ExecuteFunction2(const char* szLuaFunction, const char* format,
 			}
 			break;
 			default:
-				//LOGLUA("Ö´ÐÐLuaº¯Êý'%s'£¬´«µÝÎÞÐ§µÄÊäÈë²ÎÊýÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
-				printf("Ö´ÐÐLuaº¯Êý'%s'£¬´«µÝÎÞÐ§µÄÊäÈë²ÎÊýÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
+				//LOGLUA("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼Œä¼ é€’æ— æ•ˆçš„è¾“å…¥å‚æ•°ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
+				printf("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼Œä¼ é€’æ— æ•ˆçš„è¾“å…¥å‚æ•°ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
 				continue;
 			}
 			++na;
@@ -210,7 +210,7 @@ bool CLuaScript::ExecuteFunction2(const char* szLuaFunction, const char* format,
 	}
 
 EndLoop:
-	// µ÷ÓÃ½Å±¾º¯Êý
+	// è°ƒç”¨è„šæœ¬å‡½æ•°
 	//I64 tStart = CLOCK();
 	int ret = lua_pcall(ls, na, 0, 0);
 	//int nCostTime = int(ClockDifference(CLOCK(), tStart));
@@ -226,7 +226,7 @@ EndLoop:
 		const char *err = lua_tostring(ls, -1);
 		//LOGLUA("%s", err);
 		printf("%s", err);
-		// ·¢Éú´íÎóÊ±£¬lua_pcallÖ»»áÔÚÕ»¶¥ÁôÏÂµ¥Ò»Öµ
+		// å‘ç”Ÿé”™è¯¯æ—¶ï¼Œlua_pcallåªä¼šåœ¨æ ˆé¡¶ç•™ä¸‹å•ä¸€å€¼
 		lua_pop(ls, 1);
 		return false;
 	}
@@ -244,18 +244,18 @@ bool CLuaScript::CallLuaFunction(const char* szLuaFunction, const char *format, 
 
 	lua_State*& ls = m_ls;
 	const char *p = format;
-	int na = 0;                         // ²ÎÊý¸öÊý
+	int na = 0;                         // å‚æ•°ä¸ªæ•°
 	char *str = NULL;
 
 	//DEBUG_TRY
-		// ¼ì²é¶ÑÕ»
+		// æ£€æŸ¥å †æ ˆ
 		int n = lua_gettop(ls);
-	// Ñ¹Èë½Å±¾º¯Êý
+	// åŽ‹å…¥è„šæœ¬å‡½æ•°
 	lua_getglobal(ls, szLuaFunction);
 
 	char szParam[_MAX_PARAM_LEN] = "";
 
-	// Ñ¹Èë²ÎÊý
+	// åŽ‹å…¥å‚æ•°
 	if (p)
 	{
 		for (; *p != 0; ++p)
@@ -312,8 +312,8 @@ bool CLuaScript::CallLuaFunction(const char* szLuaFunction, const char *format, 
 			}
 			break;
 			default:
-				//LOGLUA("Ö´ÐÐLuaº¯Êý'%s'£¬´«µÝÎÞÐ§µÄÊäÈë²ÎÊýÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
-				printf("Ö´ÐÐLuaº¯Êý'%s'£¬´«µÝÎÞÐ§µÄÊäÈë²ÎÊýÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
+				//LOGLUA("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼Œä¼ é€’æ— æ•ˆçš„è¾“å…¥å‚æ•°ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
+				printf("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼Œä¼ é€’æ— æ•ˆçš„è¾“å…¥å‚æ•°ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
 				continue;
 			}
 			++na;
@@ -322,7 +322,7 @@ bool CLuaScript::CallLuaFunction(const char* szLuaFunction, const char *format, 
 	}
 
 EndLoop:
-	// µ÷ÓÃ½Å±¾º¯Êý
+	// è°ƒç”¨è„šæœ¬å‡½æ•°
 	int nr = p ? (int)strlen(p) : 0;
 
 	//I64 tStart = CLOCK();
@@ -340,12 +340,12 @@ EndLoop:
 		const char *err = lua_tostring(ls, -1);
 		//LOGLUA("%s", err);
 		printf("%s", err);
-		// ·¢Éú´íÎóÊ±£¬lua_pcallÖ»»áÔÚÕ»¶¥ÁôÏÂµ¥Ò»Öµ
+		// å‘ç”Ÿé”™è¯¯æ—¶ï¼Œlua_pcallåªä¼šåœ¨æ ˆé¡¶ç•™ä¸‹å•ä¸€å€¼
 		lua_pop(ls, 1);
 		return false;
 	}
 
-	// È¡µÃ·µ»ØÖµ¡£½Å±¾º¯ÊýµÄ·µ»ØÖµÎªÄæÐò£¬×îºóÒ»¸öÔÚÕ»¶¥
+	// å–å¾—è¿”å›žå€¼ã€‚è„šæœ¬å‡½æ•°çš„è¿”å›žå€¼ä¸ºé€†åºï¼Œæœ€åŽä¸€ä¸ªåœ¨æ ˆé¡¶
 
 	int ind = -nr;
 	int len = 0;
@@ -360,8 +360,8 @@ EndLoop:
 			case 'i':
 				if (!lua_isnumber(ls, ind))
 				{
-					//LOGLUA("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
-					printf("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
+					//LOGLUA("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
+					printf("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
 					return false;
 				}
 				*va_arg(ap, int *) = (int)lua_tointeger(ls, ind);
@@ -369,8 +369,8 @@ EndLoop:
 			case 'u':
 				if (!lua_isnumber(ls, ind))
 				{
-					//LOGLUA("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
-					printf("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
+					//LOGLUA("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
+					printf("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
 					return false;
 				}
 				*va_arg(ap, unsigned int *) = (unsigned int)lua_tointeger(ls, ind);
@@ -378,8 +378,8 @@ EndLoop:
 			case 'U':
 				if (!lua_isnumber(ls, ind))
 				{
-					//LOGLUA("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
-					printf("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
+					//LOGLUA("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
+					printf("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
 					return false;
 				}
 				*va_arg(ap, U64*) = (U64)lua_tonumber(ls, ind);
@@ -387,8 +387,8 @@ EndLoop:
 			case 'b':
 				if (!lua_isboolean(ls, ind))
 				{
-					//LOGLUA("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
-					printf("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
+					//LOGLUA("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
+					printf("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
 					return false;
 				}
 				*va_arg(ap, int *) = lua_toboolean(ls, ind);
@@ -396,19 +396,19 @@ EndLoop:
 			case 'f':
 				if (!lua_isnumber(ls, ind))
 				{
-					//LOGLUA("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
-					printf("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
+					//LOGLUA("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
+					printf("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
 					return false;
 				}
 				*va_arg(ap, double *) = lua_tonumber(ls, ind);
 				break;
-				// ×Ö·û´®£¬ÒªÇóÔÚ×Ö·û»º´æµØÖ·ºó½Ó×Ö·û»º´æ³¤¶È
-				// ÕâÀï½«·µ»ØµÄ×Ö·û´®¸´ÖÆµ½»º´æÖÐ£¬ÒÔ±ãº¯Êý×îºó»Ö¸´Õ»
+				// å­—ç¬¦ä¸²ï¼Œè¦æ±‚åœ¨å­—ç¬¦ç¼“å­˜åœ°å€åŽæŽ¥å­—ç¬¦ç¼“å­˜é•¿åº¦
+				// è¿™é‡Œå°†è¿”å›žçš„å­—ç¬¦ä¸²å¤åˆ¶åˆ°ç¼“å­˜ä¸­ï¼Œä»¥ä¾¿å‡½æ•°æœ€åŽæ¢å¤æ ˆ
 			case 's':
 				if (!lua_isstring(ls, ind))
 				{
-					//LOGLUA("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
-					printf("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
+					//LOGLUA("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
+					printf("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
 					return false;
 				}
 				str = va_arg(ap, char *);
@@ -417,8 +417,8 @@ EndLoop:
 				strcpy_s(str, len, lua_tostring(ls, ind));
 				break;
 			default:
-				//LOGLUA("Ö´ÐÐLuaº¯Êý'%s'£¬´«µÝÎÞÐ§µÄÊä³ö²ÎÊýÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
-				printf("Ö´ÐÐLuaº¯Êý'%s'£¬Ö¸¶¨ÁË²»Æ¥ÅäµÄ·µ»ØÖµÀàÐÍ£¡£¨%c£©", szLuaFunction, *p);
+				//LOGLUA("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼Œä¼ é€’æ— æ•ˆçš„è¾“å‡ºå‚æ•°ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
+				printf("æ‰§è¡ŒLuaå‡½æ•°'%s'ï¼ŒæŒ‡å®šäº†ä¸åŒ¹é…çš„è¿”å›žå€¼ç±»åž‹ï¼ï¼ˆ%cï¼‰", szLuaFunction, *p);
 				break;
 			}
 
@@ -426,10 +426,10 @@ EndLoop:
 		}
 	}
 
-	// ÍËÕ»
+	// é€€æ ˆ
 	lua_pop(ls, nr);
 
-	// ¼ì²é¶ÑÕ»
+	// æ£€æŸ¥å †æ ˆ
 	n = lua_gettop(ls);
 
 	return true;
@@ -473,7 +473,7 @@ int CLuaScript::LuaLog(lua_State* L)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// ´¦ÀíÀ´×Ô½Å±¾µÄactionÇëÇó
+// å¤„ç†æ¥è‡ªè„šæœ¬çš„actionè¯·æ±‚
 int CLuaScript::ProcessActionFromLua(lua_State *L)
 {
 	//DEBUG_TRY
@@ -489,7 +489,7 @@ int CLuaScript::ProcessActionFromLua(lua_State *L)
 	//IRole* pRole = idRole ? RoleManager()->QueryRole(idRole) : NULL;
 	//CItem* pItem = (pUser && idItem) ? pUser->GetItem(idItem) : NULL;
 
-	//// ½Å±¾µÄaction¿É¶¯Ì¬Éú³É
+	//// è„šæœ¬çš„actionå¯åŠ¨æ€ç”Ÿæˆ
 	//CActionData* pAction = GameAction()->ActionSet()->GetObj(idAction);
 	//if (!pAction && idAction >= LUA_ACTION_BEGIN)
 	//{

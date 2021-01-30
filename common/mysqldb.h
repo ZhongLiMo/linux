@@ -1,7 +1,7 @@
 #ifndef _MYSQLDB_H_
 #define _MYSQLDB_H_
 
-#include <mysql.h>
+#include <mysql/mysql.h>
 
 #include <set>
 #include <list>

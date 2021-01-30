@@ -22,37 +22,37 @@ public:
 private:
 	CLuaScript();
 	~CLuaScript();
-	bool    LoadAllScript();					// ¼ÓÔØËùÓĞ½Å±¾
-	bool    LoadFile(const char *filename);		// ¼ÓÔØ½Å±¾ÎÄ¼ş
-	bool    ExecuteFunction(const char* szLuaFunction, const char* format, ...);		// Ö´ĞĞ½Å±¾º¯Êı£¬format¶ÔÓ¦²ÎÊıÀàĞÍ
-	bool    ExecuteFunction2(const char* szLuaFunction, const char* format, const char* szParam);		// Ö´ĞĞ½Å±¾º¯Êı£¬szParam¶ÔÓ¦²ÎÊıÊı£¬Ã¿¸ö²ÎÊı¼ä¿Õ¸ñ·Ö¿ª
+	bool    LoadAllScript();					// åŠ è½½æ‰€æœ‰è„šæœ¬
+	bool    LoadFile(const char *filename);		// åŠ è½½è„šæœ¬æ–‡ä»¶
+	bool    ExecuteFunction(const char* szLuaFunction, const char* format, ...);		// æ‰§è¡Œè„šæœ¬å‡½æ•°ï¼Œformatå¯¹åº”å‚æ•°ç±»å‹
+	bool    ExecuteFunction2(const char* szLuaFunction, const char* format, const char* szParam);		// æ‰§è¡Œè„šæœ¬å‡½æ•°ï¼ŒszParamå¯¹åº”å‚æ•°æ•°ï¼Œæ¯ä¸ªå‚æ•°é—´ç©ºæ ¼åˆ†å¼€
 
 	
-	void    RegisterFunctions();				// ×¢²á×Ô¶¨Òåº¯Êı¸ø½Å±¾µ÷ÓÃ
-	bool    CallLuaFunction(const char* szLuaFunction, const char *format, va_list ap);		// Ìá¹©¸ø½Å±¾µ÷ÓÃµÄº¯Êı,·µ»ØÖµÊÇº¯Êı´«µİ¸ø½Å±¾·µ»ØÖµµÄ¸öÊı
+	void    RegisterFunctions();				// æ³¨å†Œè‡ªå®šä¹‰å‡½æ•°ç»™è„šæœ¬è°ƒç”¨
+	bool    CallLuaFunction(const char* szLuaFunction, const char *format, va_list ap);		// æä¾›ç»™è„šæœ¬è°ƒç”¨çš„å‡½æ•°,è¿”å›å€¼æ˜¯å‡½æ•°ä¼ é€’ç»™è„šæœ¬è¿”å›å€¼çš„ä¸ªæ•°
 
 private:
-	lua_State*     m_ls;                       // lua×´Ì¬
+	lua_State*     m_ls;                       // luaçŠ¶æ€
 public:
-	// Êä³öµ÷ÊÔĞÅÏ¢
+	// è¾“å‡ºè°ƒè¯•ä¿¡æ¯
 	static int OutputDebugInfo(lua_State* L);
-	// ÊäÈë½Å±¾ÈÕÖ¾
+	// è¾“å…¥è„šæœ¬æ—¥å¿—
 	static int LuaLog(lua_State* L);
-	// ´¦ÀíÀ´×Ô½Å±¾µÄactionÇëÇó
+	// å¤„ç†æ¥è‡ªè„šæœ¬çš„actionè¯·æ±‚
 	static int ProcessActionFromLua(lua_State* L);
 
 public:
 /*
- *	c++µ÷ÓÃluaµÄº¯ÊıĞ´ÔÚÕâÀï
- *	ExecuteFunction²ÎÊıÒ»Îªº¯ÊıÃû£¬²ÎÊı¶ş¡°>¡±Ç°Îª´«Èëlua²ÎÊı£¬¡°>¡±ºóÎªlua´«³ö²ÎÊı
+ *	c++è°ƒç”¨luaçš„å‡½æ•°å†™åœ¨è¿™é‡Œ
+ *	ExecuteFunctionå‚æ•°ä¸€ä¸ºå‡½æ•°åï¼Œå‚æ•°äºŒâ€œ>â€å‰ä¸ºä¼ å…¥luaå‚æ•°ï¼Œâ€œ>â€åä¸ºluaä¼ å‡ºå‚æ•°
  */
 	void dayin(int a);
 	int jiafa(int a, int b);
 
 public:
 /*
- *	luaµ÷ÓÃc++µÄº¯ÊıĞ´ÔÚÕâÀï£¬ĞèÒªÔÚRegisterFunctionsÖĞ×¢²á
- *	±ØĞëÊÇ(static int)£¬·µ»ØintÊÇ·µ»Ø²ÎÊıµÄ¸öÊı
+ *	luaè°ƒç”¨c++çš„å‡½æ•°å†™åœ¨è¿™é‡Œï¼Œéœ€è¦åœ¨RegisterFunctionsä¸­æ³¨å†Œ
+ *	å¿…é¡»æ˜¯(static int)ï¼Œè¿”å›intæ˜¯è¿”å›å‚æ•°çš„ä¸ªæ•°
  */
 
 	static int jianfa(lua_State* L);

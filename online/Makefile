@@ -18,9 +18,9 @@ YES = X
 #库文件目录
 LIBS = -L/usr/lib -L/usr/lib64/mysql -L../common
 #具体库文件
-LIBS += -lstdc++ -lmysqlclient -lcommon
+LIBS += -lstdc++ -lmysqlclient -lcommon -ljson_linux-gcc-4.8.5_libmt
 #c++头文件目录
-INCPATH = -I/usr/include -I/usr/include/mysql -I../common
+INCPATH = -I/usr/include -I../common
 #目标文件
 TARGET = test
 #依赖文件

@@ -20,7 +20,7 @@ LIBS =
 #具体库文件
 LIBS +=
 #c++头文件目录
-INCPATH = -I/usr/include -I/usr/include/mysql
+INCPATH = -I/usr/include
 #目标文件
 TARGET = libcommon.a
 #依赖文件

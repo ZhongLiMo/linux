@@ -1,5 +1,6 @@
 #include "onlinemain.h"
 
+#include <json/json.h>
 #include <fstream>
 
 #include "timer.h"
@@ -7,54 +8,61 @@
 #include "mysqltable.h"
 #include "mylog.h"
 
-//#define LUA_CONFIGFILE		"lua\\lua\\lua.conf"
+static const char* SERVER_CONFIGFILE = "../conf/server.conf";
 
-//#include <json.h>
-
-MysqlDB* mysqldb = DBHandle->GetInstance();
-TCPServer tcpserver(deal_client_msg);
 TimerManager timerManager;
+TCPServer tcpserver(deal_client_msg);
+MysqlDB* mysqldb = DBHandle->GetInstance();
 
 MyLog mainlog("MAIN", "../log");
 
+int read_conf_file(Json::Value& root);
+
 int main(int argc, char *argv[])
 {
-    timerManager.InitTimer(10);
-    mysqldb->Connect("127.0.0.1", "root", "123456", "test");
+	Json::Value root;
+	if (read_conf_file(root) < 0)
+    {
+        mainlog.SaveLog(LOG_FATAL, "read_conf_file[%s] error", SERVER_CONFIGFILE);
+    }
+    
+    mysqldb->Connect(root["mysql"]["mysql_ip"].asString().c_str(), root["mysql"]["user_name"].asString().c_str(),
+        root["mysql"]["password"].asString().c_str(), root["mysql"]["database"].asString().c_str());
 
     if (init_mysql_data() < 0)
     {
-        return -1;
+        mainlog.SaveLog(LOG_FATAL, "init_mysql_data error");
     }
 
+    if (tcpserver.initServer(root["online"]["listen_ip"].asString().c_str(), root["online"]["listen_port"].asString().c_str()) < 0)
+    {
+        mainlog.SaveLog(LOG_FATAL, "initServer error");
+    }
 
-    // std::ifstream is(LUA_CONFIGFILE, std::ios::binary);
-	// CHECKF(is.is_open());
-	// Json::Reader reader;
-	// Json::Value root;
-	// int nRole = 0;
-	// std::string strOccupation;
-	// std::string strCamp;
-
-	// if (reader.parse(is, root))
-	// {
-	// 	int path_size = root["path"].size();
-	// 	for (int i = 0; i < path_size; ++i)
-	// 	{
-    //         mainlog.SaveLog(LOG_INFO, "  [%s]", root["path"][i].asString().c_str());
-	// 	}
-	// }
-	// is.close();
-	// return true;
-    
-    tcpserver.initServer("127.0.0.1", "6388");
+    timerManager.InitTimer(10);
     while (1)
     {
-        //mainlog.SaveLog(LOG_INFO, "cscasc");
         //TCP消息
         tcpserver.onProcess();
         //定时器
         timerManager.OnTimer();
     }
+    return 0;
+}
+
+int read_conf_file(Json::Value& root)
+{
+    std::ifstream is(SERVER_CONFIGFILE, std::ios::binary);
+    if (!is.is_open())
+    {
+        return -1;
+    }
+	Json::Reader reader;
+	if (!reader.parse(is, root))
+	{
+		is.close();
+        return -1;
+	}
+	is.close();
     return 0;
 }
