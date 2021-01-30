@@ -29,7 +29,7 @@ int TCPServer::initServer(const char* ip, const char* port)
         fd_close(m_fd);
         return -1;
     }
-    epoll_add(m_eplfd, m_fd, new TCPClient(m_fd));
+    epoll_add(m_eplfd, m_fd, new TCPClient(m_fd, ip));
     return 0;
 }
 
@@ -79,7 +79,7 @@ int TCPServer::acceptClient()
 		fd_close(fd);
 		return -1;
 	}
-	TCPClient* client = new TCPClient(fd);
+	TCPClient* client = new TCPClient(fd, inet_ntoa(addr.sin_addr));
 	epoll_add(m_eplfd, fd, client);
 	m_clientset.insert(client);
 	return 0;
@@ -126,11 +126,11 @@ int TCPServer::recvClient(TCPClient* pClient)
 		{
 			return 0;
 		}
-		closeClient(pClient);
+		return -1;
 	}
 	else if (result == 0)
 	{
-		closeClient(pClient);
+		return -1;
 	}
 	else
 	{
@@ -141,8 +141,10 @@ int TCPServer::recvClient(TCPClient* pClient)
 			pClient->tcppacket.cursize -= TCP_HEAD_SIZE;
 			if (clinetProcess(pClient, &pClient->tcppacket) < 0)
 			{
+				memset(&pClient->tcppacket, 0, TCP_PACK_SIZE);
 				return -1;
 			}
+			memset(&pClient->tcppacket, 0, TCP_PACK_SIZE);
 		}
 	}
 	return 0;

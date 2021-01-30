@@ -14,8 +14,6 @@ struct TCPHeader
 };
 #pragma pack(pop)
 
-const int TCP_HEAD_SIZE = sizeof(TCPHeader);
-
 struct TCPPacket
 {
 	int safe_check();
@@ -25,5 +23,8 @@ struct TCPPacket
 	unsigned short		cursize;
 	char				buffer[TCP_BUFF_SIZE];
 };
+
+const int TCP_HEAD_SIZE = sizeof(TCPHeader);
+const int TCP_PACK_SIZE = sizeof(TCPPacket);
 
 #endif // !_TCP_PACKET_H_

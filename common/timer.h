@@ -17,7 +17,7 @@ public:
 	virtual ~TimerManager();
 public:
 	void OnTimer();
-    void InitTimer(int timer_stamp) { timer_stamp_ms = timer_stamp; }
+    void InitTimer(unsigned int timer_stamp) { timer_stamp_ms = timer_stamp; }
 private:
 	void RemoveTimer(Timer* timer);
 	void RegisterTimer(Timer* timer);
@@ -26,7 +26,7 @@ private:
 	bool						change_iter;
 	TimerSet					listeners;
 	TimerSet::iterator			timer_iter;
-    int                         timer_stamp_ms;
+    unsigned int                timer_stamp_ms;
 	friend class Timer;
 };
 

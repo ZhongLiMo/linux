@@ -4,9 +4,15 @@
 #include "cscmd.h"
 #include "mysqltable.h"
 
+extern MyLog mainlog;
 
 int deal_client_msg(TCPClient* pTCPClient, TCPPacket* pTCPPacket)
 {
+    if (pTCPPacket->safe_check() < 0)
+    {
+        mainlog.SaveLog(LOG_ERROR, "fd[%d] ip[%s] body[%s]", pTCPClient->m_fd, pTCPClient->m_ip.c_str());
+        return -1;
+    }
     switch (pTCPPacket->header.cmd)
     {
     case CMD_C_REGISTER_USER:
@@ -33,9 +39,11 @@ int deal_client_msg(TCPClient* pTCPClient, TCPPacket* pTCPPacket)
         }
         break;
     default:
-        printf("cmd:[%d] lenth[%d] body[%s]", pTCPPacket->header.cmd, pTCPPacket->header.length, pTCPPacket->buffer);
+        //printf("cmd:[%d] lenth[%d] body[%s]", pTCPPacket->header.cmd, pTCPPacket->header.length, pTCPPacket->buffer);
         pTCPClient->sendToClient();
         break;
     }
+    mainlog.SaveLog(LOG_INFO, "cmd:[%d] lenth[%d] body[%s]", static_cast<int>(pTCPPacket->header.cmd), static_cast<int>(pTCPPacket->header.length), pTCPPacket->buffer);
+    pTCPClient->sendToClient();
     return 0;
 }

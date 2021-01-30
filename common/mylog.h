@@ -3,8 +3,9 @@
 
 #include <string>
 
-const int LOG_BUF_SIZE = 1024 * 100;
-const int LOG_MAX_SIZE = 1024 * 1024 * 1000;
+const int LOG_MAX_NAME = 512;
+const int LOG_BUF_SIZE = 1024 * 100 * 2;
+const int LOG_MAX_SIZE = 1024 * 1024 * 200;
 
 enum LOG_LEVEL
 {
@@ -26,7 +27,7 @@ enum LOG_LEVEL
 class MyLog
 {
 public:
-	MyLog(const std::string& file_name, const std::string& file_dir, long max_size = 1024 * 1024 * 100, LOG_LEVEL log_level = LOG_LEVEL_DEBUG);
+	MyLog(const std::string& file_name, const std::string& file_dir, long max_size = LOG_MAX_SIZE, LOG_LEVEL log_level = LOG_LEVEL_DEBUG);
 	virtual ~MyLog();
 public:
 	void SaveLog(LOG_LEVEL log_level, int line, const char *func, const char *format, ...);
@@ -34,13 +35,16 @@ private:
 	MyLog(const MyLog&) = delete;
 	const MyLog& operator=(const MyLog&) = delete;
 private:
-	void output();
+	void output(int len);
+	void rotate_day();
+	void rotate_size();
 	void check_log_file();
 	bool check_log_date();
-	std::string get_file_name();
+	const char* get_file_name();
 private:
 	struct tm			m_cur_time;
 	long				m_max_size;
+	long				m_cur_size;
 	FILE*				m_log_file;
 	std::string			m_file_name;
 	std::string			m_file_dir;

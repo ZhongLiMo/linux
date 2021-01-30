@@ -24,7 +24,7 @@ int main()
         return -1;
     }
 
-	TCPClient client(iSock);
+	TCPClient client(iSock, SERVER_ADDRESS);
 
 	while (true)
 	{

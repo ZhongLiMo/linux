@@ -2,9 +2,9 @@
 #include "netbase.h"
 
 
-TCPClient::TCPClient(int fd) : m_fd(fd)
+TCPClient::TCPClient(int fd, const std::string& ip) : m_fd(fd), m_ip(ip)
 {
-
+    memset(&tcppacket, 0, TCP_PACK_SIZE);
 }
 
 int TCPClient::sendToClient()
