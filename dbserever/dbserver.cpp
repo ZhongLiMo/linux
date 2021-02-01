@@ -14,8 +14,8 @@ TimerManager timerManager;
 TCPServer tcpserver(deal_client_msg);
 MysqlDB* mysqldb = DBHandle->GetInstance();
 
-MyLog mainlog("MAIN", "../log");
-MyLog mysqllog("MYSQL_MAIN", "../log");
+MyLog mainlog("DBSERVER", "../log");
+MyLog mysqllog("MYSQL_DBSERVER", "../log");
 
 int read_conf_file(Json::Value& root);
 

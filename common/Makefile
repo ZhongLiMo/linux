@@ -24,7 +24,7 @@ INCPATH = -I/usr/include
 #目标文件
 TARGET = libcommon.a
 #依赖文件
-OBJECTS = mysqldb.o netbase.o tcpclient.o tcppacket.o tcpserver.o mylog.o basefunc.o timer.o
+OBJECTS = mysqldb.o netbase.o tcpclient.o tcppacket.o tcpserver.o mylog.o basefunc.o timer.o shmqueue.o
 
 all: $(TARGET)
 

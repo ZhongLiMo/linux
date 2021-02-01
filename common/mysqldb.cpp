@@ -5,8 +5,6 @@
 const char*	g_strKey 	= "id";
 const char*	g_encoding 	= "GBK";
 
-MyLog mysqllog("MYSQL", "../log");
-
 Field::operator short()
 {
 	if (MYSQL_TYPE_TINY == m_fieldType || MYSQL_TYPE_SHORT == m_fieldType || MYSQL_TYPE_LONG == m_fieldType || MYSQL_TYPE_LONGLONG == m_fieldType)
