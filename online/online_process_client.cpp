@@ -28,13 +28,18 @@ int deal_client_msg(TCPClient* pTCPClient, TCPPacket* pTCPPacket)
                     return -1;
                 }
             }
-            std::shared_ptr<UserRecord> pUserRecord = UserRecord::CreateNew(userTable.GetNewKey());
+            PUserRecord pUserRecord = UserRecord::CreateNew(userTable.GetNewKey());
             pUserRecord->SetString(USER_TABLE_NAME, std::string(user.name));
             userTable.InsertRecord(pUserRecord, true);
         }
         break;
         case CMD_C_TALK:
         {
+            RegisterUser user;
+            memcpy(&user, pTCPPacket->buffer, 20);
+            PTalkRecord pTalkRecord = TalkRecord::CreateNew(talkTable.GetNewKey());
+            pTalkRecord->SetString(USER_TALK_CONTENT, std::string(user.name));
+            talkTable.InsertRecord(pTalkRecord, false);
         }
         break;
         default:

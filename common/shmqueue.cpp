@@ -1,4 +1,4 @@
-#include "shm_queue.h"
+#include "shmqueue.h"
 
 #include <sys/shm.h>
 #include <unordered_map>
@@ -121,7 +121,7 @@ size_t add_head()
     return next;
 }
 
-int shm_push(int key, void* p)
+int shm_push(int key, const void* p)
 {
     if (p == NULL)
     {

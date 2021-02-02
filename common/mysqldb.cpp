@@ -1,7 +1,7 @@
 #include "mysqldb.h"
 
 const char*	g_strKey 	= "id";
-const char*	g_encoding 	= "GBK";
+const char*	g_encoding 	= "utf8";
 
 Field::operator short()
 {

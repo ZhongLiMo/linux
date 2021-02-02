@@ -27,5 +27,17 @@ using UserTable = DBTble<UserRecord>;
 using PUserRecord = std::shared_ptr<UserRecord>;
 extern UserTable userTable;
 
+enum UseTalkField
+{
+    USER_TALK_ID   = 0,
+    USER_TALK_CONTENT = 1,
+    USER_TALK_MAX  = 2,
+};
+extern char talkTableName[];
+using TalkRecord = DBRecord<UseTalkField, USER_TALK_MAX, talkTableName>;
+using TalkTable = DBTble<TalkRecord>;
+using PTalkRecord = std::shared_ptr<TalkRecord>;
+extern TalkTable talkTable;
+
 
 #endif // !_MYSQL_TABLE_H_

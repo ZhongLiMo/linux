@@ -7,6 +7,7 @@
 #include "tcpserver.h"
 #include "mysqltable.h"
 #include "mylog.h"
+#include "shmqueue.h"
 
 static const char* SERVER_CONFIGFILE = "../conf/server.conf";
 static const char* SHM_CONFIGFILE = "../conf/shm.conf";
@@ -48,10 +49,10 @@ int main(int argc, char *argv[])
 
     if (read_conf_file(root, SHM_CONFIGFILE) < 0)
     {
-        mainlog.SaveLog(LOG_FATAL, "read_conf_file[%s] error", SERVER_CONFIGFILE);
+        mainlog.SaveLog(LOG_FATAL, "read_conf_file[%s] error", SHM_CONFIGFILE);
     }
 
-    if (shm_create(root["dbserver"]["shmkey"].asInt(), root["dbserver"]["length"].asInt(), root["dbserver"]["permission"].asInt(), SQL_SIZE, true) < 0)
+    if (shm_create(root["dbserver"]["shmkey"].asInt(), root["dbserver"]["length"].asInt(), ShmPermission(root["dbserver"]["permission"].asInt()), SQL_SIZE, true) < 0)
     {
         mainlog.SaveLog(LOG_FATAL, "shm_create fail");
     }
@@ -73,7 +74,7 @@ int read_conf_file(Json::Value& root, const char* conf_file)
 {
     if (conf_file == NULL)
     {
-        return -1
+        return -1;
     }
     std::ifstream is(conf_file, std::ios::binary);
     if (!is.is_open())

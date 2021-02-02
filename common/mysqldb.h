@@ -144,12 +144,11 @@ private:
 	MysqlDB(const MysqlDB&) = delete;
 	MysqlDB& operator=(const MysqlDB&) = delete;
 private:
-	int(*dbProcess)(const char(&strsql)[SQL_SIZE]);
 	MYSQL*						m_mysql;
 	MYSQL_RES*					m_mysqlRes;
 	MYSQL_ROW					m_mysqlRow;
 	MYSQL_FIELD*				m_mysqlField;
-	std::list<std::string>		sql_list;
+	int(*dbProcess)(const char(&strsql)[SQL_SIZE]);
 	template<typename Index, Index size, const char* tableName>
 	friend class Record;
 };

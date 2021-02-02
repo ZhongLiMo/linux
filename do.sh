@@ -13,6 +13,10 @@ then
     echo "enter testclient"
     cd testclient && make && cd ..
     echo "leave testclient"
+
+    echo "enter dbserver"
+    cd dbserver && make && cd ..
+    echo "leave dbserver"
 elif [[ $1 = 'remake' ]];
 then
     echo "enter common"
@@ -26,6 +30,10 @@ then
     echo "enter testclient"
     cd testclient && make clean && make && cd ..
     echo "leave testclient"
+
+    echo "enter dbserver"
+    cd dbserver && make clean && make && cd ..
+    echo "leave dbserver"
 else
     echo "Input Is Error."
 fi

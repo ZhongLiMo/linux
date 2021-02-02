@@ -32,20 +32,20 @@ int main(int argc, char *argv[])
 
     if (read_conf_file(root, SHM_CONFIGFILE) < 0)
     {
-        mainlog.SaveLog(LOG_FATAL, "read_conf_file[%s] error", SERVER_CONFIGFILE);
+        mainlog.SaveLog(LOG_FATAL, "read_conf_file[%s] error", SHM_CONFIGFILE);
     }
 
-    if (shm_create(root["dbserver"]["shmkey"].asInt(), root["dbserver"]["length"].asInt(), root["dbserver"]["permission"].asInt(), SQL_SIZE, true) < 0)
+    if (shm_create(root["dbserver"]["shmkey"].asInt(), root["dbserver"]["length"].asInt(), ShmPermission(root["dbserver"]["permission"].asInt()), SQL_SIZE, true) < 0)
     {
         mainlog.SaveLog(LOG_FATAL, "shm_create fail");
     }
 
     int shm_key = root["dbserver"]["shmkey"].asInt();
-    int ret = 0;
     while (1)
     {
         if (shm_pop(shm_key, strsql) == 0)
         {
+            mainlog.SaveLog(LOG_DEBUG, "shm_pop recv[%s]", strsql);
             mysqldb->MysqlQuery(strsql, true);  //内部已打日志
         }
         else
