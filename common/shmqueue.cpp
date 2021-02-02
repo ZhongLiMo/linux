@@ -81,6 +81,46 @@ int shm_delete(int key)
     return 0;
 }
 
+size_t get_tail()
+{
+    size_t tail = *ite->second.tail;
+    while (!__sync_bool_compare_and_swap(ite->second.tail, tail, tail))
+    {
+        tail = *ite->second.tail;
+    }
+    return tail;
+}
+
+size_t add_tail()
+{
+    size_t tail = *ite->second.tail;
+    size_t next = (tail == (ite->second.length - 1)) ? 0 : (tail + 1);
+    while (!__sync_bool_compare_and_swap(ite->second.tail, tail, next))
+    {
+        tail = *ite->second.tail;
+        next = (tail == (ite->second.length - 1)) ? 0 : (tail + 1);
+    }
+    return tail;
+}
+
+size_t get_head()
+{
+    size_t head = *ite->second.head;
+    while (!__sync_bool_compare_and_swap(ite->second.head, head, head))
+    {
+        head = *ite->second.head;
+    }
+    return head;
+}
+
+size_t add_head()
+{
+    size_t head = *ite->second.head;
+    size_t next = (head == (ite->second.length - 1)) ? 0 : (head + 1);
+    *ite->second.head = next;
+    return next;
+}
+
 int shm_push(int key, void* p)
 {
     if (p == NULL)
@@ -92,15 +132,14 @@ int shm_push(int key, void* p)
     {
         return -1;
     }
-    size_t tail = *ite->second.tail;
+    size_t tail = add_tail();
     size_t next = (tail == (ite->second.length - 1)) ? 0 : (tail + 1);
-    while (!__sync_bool_compare_and_swap(ite->second.tail, tail, next))
+    if (next == get_head())
     {
-        tail = *ite->second.tail;
-        next = (tail == (ite->second.length - 1)) ? 0 : (tail + 1);
+        return -1;
     }
     memcpy((void*)(reinterpret_cast<size_t>(ite->second.pshm) + tail * (ite->second.size + sizeof(bool))), p, ite->second.size);
-    *(bool*)(reinterpret_cast<size_t>(ite->second.pshm) + *ite->second.tail * (ite->second.size + sizeof(bool)) + ite->second.size) = true;
+    *(bool*)(reinterpret_cast<size_t>(ite->second.pshm) + tail * (ite->second.size + sizeof(bool)) + ite->second.size) = true;
     return 0;
 }
 
@@ -115,37 +154,13 @@ int shm_pop(int key, void* p)
     {
         return -1;
     }
-    size_t tail = *ite->second.tail;
-    while (!__sync_bool_compare_and_swap(ite->second.tail, tail, tail))
-    {
-        tail = *ite->second.tail;
-    }
-    if (tail == *ite->second.head)
+    if (get_tail() == *ite->second.head)
     {
         return -1;
     }
     while (*(bool*)(reinterpret_cast<size_t>(ite->second.pshm) + *ite->second.head * (ite->second.size + sizeof(bool)) + ite->second.size) == false);
     memcpy(p, (void*)(reinterpret_cast<size_t>(ite->second.pshm) + *ite->second.head * (ite->second.size + sizeof(bool))), ite->second.size);
-    return 0;
-}
-
-int shm_popout(int key)
-{
-    ite = g_shm.find(key);
-    if (ite == g_shm.end())
-    {
-        return -1;
-    }
-    size_t tail = *ite->second.tail;
-    while (!__sync_bool_compare_and_swap(ite->second.tail, tail, tail))
-    {
-        tail = *ite->second.tail;
-    }
-    if (tail == *ite->second.head)
-    {
-        return -1;
-    }
     *(bool*)(reinterpret_cast<size_t>(ite->second.pshm) + *ite->second.head * (ite->second.size + sizeof(bool)) + ite->second.size) = false;
-    *ite->second.head = (*ite->second.head == (ite->second.length - 1)) ? 0 : (*ite->second.head + 1);
+    add_head();
     return 0;
 }

@@ -130,20 +130,21 @@ public:
 		static MysqlDB mysqldb;
 		return &mysqldb;
 	}
+	bool MysqlQuery(const char(&strsql)[SQL_SIZE], bool updateNow);
 	template<typename RecordType>
 	bool Select(RecordTable<RecordType>& recordTable, const char* tableName, const char* WHERE = NULL, const char* ORDERBY = NULL, const char* ORDER = "ASC");
 	void Connect(const char* host, const char* user, const char* passwd, const char* dbname, unsigned int port = MYSQL_PORT, const char* unixSocket = NULL, unsigned long clientFlag = 0);
+	void InitDBProcess(int(*process)(const char(&strsql)[SQL_SIZE])) {dbProcess = process;}
 private:
-	bool MysqlQuery(const std::string& strsql);
-	bool MysqlQuery(const char(&strsql)[SQL_SIZE], bool updateNow);
 	template<typename RecordType>
 	void InitDefaultRecord(const char(&strsql)[SQL_SIZE]);
 private:
-	MysqlDB() : m_mysql(NULL), m_mysqlRes(NULL), m_mysqlRow(NULL), m_mysqlField(NULL) {}
+	MysqlDB() : m_mysql(NULL), m_mysqlRes(NULL), m_mysqlRow(NULL), m_mysqlField(NULL), dbProcess(NULL) {}
 	virtual ~MysqlDB() { if (m_mysql) mysql_close(m_mysql); m_mysql = NULL; }
 	MysqlDB(const MysqlDB&) = delete;
 	MysqlDB& operator=(const MysqlDB&) = delete;
 private:
+	int(*dbProcess)(const char(&strsql)[SQL_SIZE]);
 	MYSQL*						m_mysql;
 	MYSQL_RES*					m_mysqlRes;
 	MYSQL_ROW					m_mysqlRow;

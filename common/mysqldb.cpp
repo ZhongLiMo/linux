@@ -1,7 +1,5 @@
 #include "mysqldb.h"
 
-
-
 const char*	g_strKey 	= "id";
 const char*	g_encoding 	= "GBK";
 
@@ -85,18 +83,6 @@ void Field::GetField(enum_field_types fieldType, const char* val)
 	}
 }
 
-
-bool MysqlDB::MysqlQuery(const std::string& strsql)
-{
-	if (!m_mysql) 
-		mysqllog.SaveLog(LOG_FATAL, "mysql not connect");
-	if (mysql_query(m_mysql, strsql.c_str()))
-	{
-		mysqllog.SaveLog(LOG_ERROR, "sql(%s) query error(%s)", strsql.c_str(), mysql_error(m_mysql));
-		return false;
-	}
-	return true;
-}
 bool MysqlDB::MysqlQuery(const char(&strsql)[SQL_SIZE], bool updateNow)
 {
 	if (updateNow)
@@ -111,7 +97,7 @@ bool MysqlDB::MysqlQuery(const char(&strsql)[SQL_SIZE], bool updateNow)
 	}
 	else
 	{
-		sql_list.push_back(strsql);
+		dbProcess(strsql);
 	}
 	return true;
 }
